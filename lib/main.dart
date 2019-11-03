@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -45,13 +46,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   // int _counter = 0;
-  List<LevelData> levelsData = new List();
+  List<LocalLevelData> levelsData = new List();
   Set<String> idiomsSet = new Set();
   int level = -1;
   int curSelectItemIdx = -1;
-  Map<int, int> curLvWordsMap = new Map();
+  // Map<int, int> curLvWordsMap = new Map();
 
-  LevelData _getCurLvData() {
+  LocalLevelData _getCurLvData() {
     if (level < 0 || level > levelsData.length) return null;
     return levelsData[level];
   }
@@ -62,7 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
       dynamic json = new JsonDecoder().convert(txt);
       for (dynamic data in json) {
         LevelData ld = new LevelData.fromJson(data);
-        levelsData.add(ld);
+        LocalLevelData lld = LocalLevelData.fromLevelData(ld);
+        levelsData.add(lld);
         for (String idiom in ld.idiom) {
           idiomsSet.add(idiom);
         }
@@ -76,76 +78,53 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _updateLvWordsMap() {
-    curLvWordsMap.clear();
-    LevelData ld = _getCurLvData();
-    if (ld != null) {
-      for (int i = 0; i < ld.word.length; ++i) {
-        int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
-        curLvWordsMap[pos] = i;
-      }
-    }
-  }
+  // void _updateLvWordsMap() {
+  //   curLvWordsMap.clear();
+  //   LocalLevelData ld = _getCurLvData();
+  //   if (ld != null) {
+  //     for (int i = 0; i < ld.word.length; ++i) {
+  //       int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
+  //       curLvWordsMap[pos] = i;
+  //     }
+  //   }
+  // }
 
   void _switchLevel(lv) {
     setState(() {
       level = lv;
       curSelectItemIdx = -1;
-      _updateLvWordsMap();
+      // _updateLvWordsMap();
     });
   }
 
   // ret: -1.当前item为null 0.normal 1.fixed 2.mask 3.no word
   int _getCurItemType() {
     if (level != -1 && curSelectItemIdx != -1) {
-      LevelData ld = levelsData[level];
-      bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
-      if (!hasWord) return 3;
-      int idx = curLvWordsMap[curSelectItemIdx];
-      bool isMask = ld.mask.indexOf(idx) != -1;
-      bool isFixed = ld.answer.indexOf(idx) == -1;
-      return isMask ? 2: isFixed ? 1 : 0;
+      LocalLevelData lld = _getCurLvData();
+      return lld.types[curSelectItemIdx];
     }
     return -1;
   }
 
   void _switchCurItemType(int type) {
     if (level != -1 && curSelectItemIdx != -1) {
-      LevelData ld = levelsData[level];
-      bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
-      if (!hasWord) return;
-      int idx = curLvWordsMap[curSelectItemIdx];
-      // String word = ld.word[idx];
       setState(() {
-        if (type == 0) {
-          ld.mask.remove(idx);
-          if (ld.answer.indexOf(idx) == -1) {
-            ld.answer.add(idx);
-            ld.answer.sort();
-          }
-        } else if (type == 1) {
-          ld.mask.remove(idx);
-          ld.answer.remove(idx);
-        } else if (type == 2) {
-          ld.answer.remove(idx);
-          if (ld.mask.indexOf(idx) == -1) {
-            ld.mask.add(idx);
-            ld.mask.sort();
-          }
-        }
+        LocalLevelData lld = _getCurLvData();
+        lld.types[curSelectItemIdx] = type;
       });
     }
   }
 
   Widget _getCurIdiomList() {
     List<String> idioms = new List();
-    LevelData ld = _getCurLvData();
+    LocalLevelData ld = _getCurLvData();
     if (ld != null && curSelectItemIdx != -1) {
       // idioms = idiomsSet.toList();
-      bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
-      if (hasWord) {
-        int idx = curLvWordsMap[curSelectItemIdx];
-        String word = ld.word[idx];
+      // bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
+      String word = ld.words[curSelectItemIdx];
+      if (word.length > 0) {
+        // int idx = curLvWordsMap[curSelectItemIdx];
+        // String word = ld.word[idx];
         for (String idiom in idiomsSet) {
           if (idiom.indexOf(word) != -1) {
             idioms.add(idiom);
@@ -171,35 +150,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Widget> _getWordsItems() {
     List<Widget> widgets = List();
-    // LevelData ld = level == -1 ? null : levelsData[level];
-    // Map<int, int> wordsMap = new Map();
-    // if (ld != null) {
-    //   for (int i = 0; i < ld.word.length; ++i) {
-    //     int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
-    //     wordsMap[pos] = i;
-    //   }
-    // }
+    LocalLevelData lld = _getCurLvData();
     for (int i = 0; i < 81; ++i) {
-      bool hasWord = curLvWordsMap.containsKey(i);
-      bool isSelect = hasWord && i == curSelectItemIdx;
-      String imgPath = '';
+      // bool hasWord = curLvWordsMap.containsKey(i);
+      bool hasWord = false;
+      bool isSelect = false;
       String word = '';
-      if (hasWord) {
-        LevelData ld = _getCurLvData();
-        int idx = curLvWordsMap[i];
-        // LevelData ld = levelsData[idx];
-        bool isMask = ld.mask.indexOf(idx) != -1;
-        bool isFixed = ld.answer.indexOf(idx) == -1;
-        imgPath = isMask ? "assets/image/game_tt_bg4.png" :
-          isFixed ? "assets/image/game_tt_bg3.png" : "assets/image/game_tt_bg2.png";
-        word = ld.word[idx];
+      String imgPath = '';
+      if (lld != null) {
+        word = lld.words[i];
+        hasWord = word.length > 0;
+        isSelect = i == curSelectItemIdx;
+        if (hasWord) {
+          int type = lld.types[i];
+          bool isMask = type == 2;
+          bool isFixed = type == 1;
+          imgPath = isMask ? "assets/image/game_tt_bg4.png" :
+            isFixed ? "assets/image/game_tt_bg3.png" : "assets/image/game_tt_bg2.png";
+          // word = ld.word[idx];
+        }
       }
       FlatButton button = FlatButton(
         child: Text(
           word,
-          style: TextStyle(
-            fontSize: 30
-          ),
         ),
         onPressed: () => _switchCurSelectItemIdx(i),
       );
@@ -237,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     widgets.add(
       RaisedButton(
-        child: Text('打开'),
+        child: Text('Open'),
         onPressed: () {
           Tools.getFileText(_loadLevelData);
         },
@@ -248,12 +221,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     widgets.add(
       RaisedButton(
-        child: Text('保存'),
+        child: Text('Save'),
         onPressed: () {
         },
       ),
     );
     if (level != -1 && curSelectItemIdx != -1) {
+      LocalLevelData lld = _getCurLvData();
       widgets.add(
         Padding(padding: EdgeInsets.all(8),),
       );
@@ -286,6 +260,67 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text('Normal'),
             onChanged:(v) => _switchCurItemType(0),
           ),
+        ),
+      );
+      widgets.add(
+        Padding(padding: EdgeInsets.all(8),),
+      );
+      if (lld.isRemoveable(curSelectItemIdx, true)) {
+        widgets.add(
+          RaisedButton(
+            child: Text('RM Hor'),
+            onPressed: () {
+              if (level != -1 && curSelectItemIdx != -1) {
+                setState(() {
+                  LocalLevelData lld = _getCurLvData();
+                  if (lld != null) {
+                    // lld.rmWord(curSelectItemIdx);
+                    lld.rmIdiom(curSelectItemIdx, true);
+                  }
+                });
+              }
+            },
+          ),
+        );
+        
+        widgets.add(
+          Padding(padding: EdgeInsets.all(8),),
+        );
+      }
+
+      if (lld.isRemoveable(curSelectItemIdx, false)) {
+        widgets.add(
+          RaisedButton(
+            child: Text('RM Ver'),
+            onPressed: () {
+              if (level != -1 && curSelectItemIdx != -1) {
+                setState(() {
+                  LocalLevelData lld = _getCurLvData();
+                  if (lld != null) {
+                    // lld.rmWord(curSelectItemIdx);
+                    lld.rmIdiom(curSelectItemIdx, false);
+                  }
+                });
+              }
+            },
+          ),
+        );
+        widgets.add(
+          Padding(padding: EdgeInsets.all(8),),
+        );
+      }
+      
+      widgets.add(
+        RaisedButton(
+          child: Text('RM ALL'),
+          onPressed: () {
+            setState(() {
+                LocalLevelData lld = _getCurLvData();
+                if (lld != null) {
+                  lld.rmAllWord();
+                }
+              });
+          },
         ),
       );
       widgets.add(

@@ -137,3 +137,170 @@ class LevelData {
     return data;
   }
 }
+
+class LocalLevelData {
+  int id;
+  // List<int> posx;
+  // List<int> posy;
+  // List<int> answer;
+  // List<String> word;
+  // List<int> mask;
+  int levelup;
+  int hero;
+  List<String> idiom;
+  int wifenum;
+  int house;
+  List<String> words;
+  // 0.normal 1.fixed 2.mask 3.no word
+  List<int> types;
+
+  // LocalLevelData({
+  //   this.id,
+  //   this.levelup,
+  //   this.hero,
+  //   this.idiom,
+  //   this.wifenum,
+  //   this.house,
+  // });
+
+  bool hasWord(int idx) {
+    return types[idx] != 3;
+  }
+
+  List<int> getIdiomIdx(int idx, bool isHor) {
+    List<int> idiom = new List();
+    if (hasWord(idx)) {
+      idiom.add(idx);
+      int col = idx % 9;
+      int row = (idx / 9).floor();
+      int dest = isHor ? col : row;
+      final fun = (int destIdx, bool isFirst) {
+        if (hasWord(destIdx)) {
+          if (isFirst) {
+            idiom.insert(0, destIdx);
+          } else {
+            idiom.add(destIdx);
+          }
+          return true;
+        } else {
+          return false;
+        }
+      };
+      for (int i = dest - 1; i >= 0; --i) {
+        int destIdx = isHor ? row * 9 + i : i * 9 + col;
+        if (!fun(destIdx, true)) break;
+      }
+      for (int i = dest + 1; i >= 0; ++i) {
+        int destIdx = isHor ? row * 9 + i : i * 9 + col;
+        if (!fun(destIdx, false)) break;
+      }
+    }
+    return idiom;
+  }
+
+  bool hasIdiom(int idx, bool isHor) {
+    return getIdiomIdx(idx, isHor).length == 4;
+  }
+
+  bool isRemoveable(int idx, bool isHor) {
+    List<int> idxs = getIdiomIdx(idx, isHor);
+    if (idxs.length == 4) {
+      int cnt = 0;
+      for (int i = 0; i < idxs.length; ++i) {
+        if (hasIdiom(idxs[i], !isHor)) {
+          ++cnt;
+        }
+      }
+      return cnt < 2;
+    }
+    return false;
+  }
+
+  void rmWord(int idx) {
+    words[idx] = '';
+    types[idx] = 3;
+  }
+
+  void rmIdiom(int idx, bool isHor) {
+    if (isRemoveable(idx, isHor)) {
+      List<int> idxs = getIdiomIdx(idx, isHor);
+      for (int idx in idxs) {
+        if (!hasIdiom(idx, !isHor)) {
+          rmWord(idx);
+        }
+      }
+    }
+  }
+
+  void rmAllWord() {
+    words.fillRange(0, 81, '');
+    types.fillRange(0, 81, 3);
+  }
+
+  LocalLevelData.fromLevelData(LevelData data) {
+    id = data.id;
+    levelup = data.levelup;
+    hero = data.hero;
+    idiom = data.idiom;
+    wifenum = data.wifenum;
+    house = data.house;
+    words = new List(81);
+    words.fillRange(0, 81, "");
+    types = new List(81);
+    types.fillRange(0, 81, 3);
+    int len = data.word.length;
+    for (int i = 0; i < len; ++i) {
+      int pos = data.posx[i] + (8 - data.posy[i]) * 9;
+      bool isMask = data.mask.indexOf(i) != -1;
+      bool isFixed = data.answer.indexOf(i) == -1;
+      words[pos] = data.word[i];
+      types[pos] = isMask ? 2: isFixed ? 1 : 0;
+    }
+  }
+
+  LevelData toLevelData() {
+    LevelData ld = new LevelData(
+      id: id,
+      levelup: levelup,
+      hero: hero,
+      idiom: idiom,
+      wifenum: wifenum,
+      house: house,
+    );
+    List<int> posx = new List();
+    List<int> posy = new List();
+    List<String> word = new List();
+    List<int> mask = new List();
+    List<int> answer = new List();
+    int idx = 0;
+    for (int i = 0; i < 81; ++i) {
+      int type = types[i];
+      if (type != 3) {
+        word[idx] = words[i];
+        posx[idx] = i % 9;
+        posy[idx] = 8 - (i / 9).floor();
+        ++idx;
+        switch (type) {
+          case 0: {
+            answer.add(idx);
+          }
+          break;
+          case 1: {
+
+          }
+          break;
+          case 2: {
+            mask.add(idx);
+          }
+          break;
+        }
+      }
+    }
+    ld.posx = posx;
+    ld.posy = posy;
+    ld.word = word;
+    ld.mask = mask;
+    ld.answer = answer;
+    return ld;
+  }
+}
