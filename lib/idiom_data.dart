@@ -190,7 +190,7 @@ class LocalLevelData {
         int destIdx = isHor ? row * 9 + i : i * 9 + col;
         if (!fun(destIdx, true)) break;
       }
-      for (int i = dest + 1; i >= 0; ++i) {
+      for (int i = dest + 1; i < 9; ++i) {
         int destIdx = isHor ? row * 9 + i : i * 9 + col;
         if (!fun(destIdx, false)) break;
       }
