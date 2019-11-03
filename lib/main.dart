@@ -47,51 +47,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // int _counter = 0;
   List<LevelData> levelsData = new List();
   int level = -1;
-
-  List<Widget> _getWordsItems() {
-    List<Widget> widgets = List();
-    LevelData ld = level == -1 ? null : levelsData[level];
-    Map<int, int> wordsMap = new Map();
-    if (ld != null) {
-      for (int i = 0; i < ld.word.length; ++i) {
-        int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
-        wordsMap[pos] = i;
-      }
-    }
-    for (int i = 0; i < 81; ++i) {
-      bool hasWord = wordsMap.containsKey(i);
-      if (hasWord) {
-        int idx = wordsMap[i];
-        // LevelData ld = levelsData[idx];
-        bool isMask = ld.mask.indexOf(idx) != -1;
-        bool isFixed = ld.answer.indexOf(idx) == -1;
-        String imgPath = isMask ? "assets/image/game_tt_bg4.png" :
-          isFixed ? "assets/image/game_tt_bg3.png" : "assets/image/game_tt_bg2.png";
-        String word = ld.word[idx];
-        widgets.add(
-          Stack(
-            alignment: AlignmentDirectional.center,
-            children: <Widget>[
-              Image.asset(imgPath),
-              Text(word),
-            ],
-          ),
-        );
-      } else {
-        widgets.add(
-          Container(
-            alignment: Alignment.center,
-            child: Text(
-              "",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-            color: Colors.black38,
-          ),
-        );
-      }
-    }
-    return widgets;
-  }
+  int curSelectItemIdx = -1;
+  Map<int, int> curLvWordsMap = new Map();
 
   void _loadLevelData(String txt) {
     setState(() {
@@ -104,12 +61,191 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _switchLevel(lv) {
+  void _switchCurSelectItemIdx(int idx) {
     setState(() {
-      level = lv;
+      curSelectItemIdx = idx;
     });
   }
 
+  void _switchLevel(lv) {
+    setState(() {
+      curLvWordsMap.clear();
+      LevelData ld = lv == -1 ? null : levelsData[lv];
+      if (ld != null) {
+        for (int i = 0; i < ld.word.length; ++i) {
+          int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
+          curLvWordsMap[pos] = i;
+        }
+      }
+      level = lv;
+      curSelectItemIdx = -1;
+    });
+  }
+
+  // ret: -1.当前item为null 0.normal 1.fixed 2.mask 3.no word
+  int _getCurItemType() {
+    if (level != -1 && curSelectItemIdx != -1) {
+      LevelData ld = levelsData[level];
+      bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
+      if (!hasWord) return 3;
+      int idx = curLvWordsMap[curSelectItemIdx];
+      bool isMask = ld.mask.indexOf(idx) != -1;
+      bool isFixed = ld.answer.indexOf(idx) == -1;
+      return isMask ? 2: isFixed ? 1 : 0;
+    }
+    return -1;
+  }
+
+  int _switchCurItemType(int type) {
+    if (level != -1 && curSelectItemIdx != -1) {
+      LevelData ld = levelsData[level];
+      bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
+      if (!hasWord) return 0;
+      int idx = curLvWordsMap[curSelectItemIdx];
+      // String word = ld.word[idx];
+      setState(() {
+        if (type == 0) {
+          ld.mask.remove(idx);
+          if (ld.answer.indexOf(idx) == -1) {
+            ld.answer.add(idx);
+            ld.answer.sort();
+          }
+        } else if (type == 1) {
+          ld.mask.remove(idx);
+          ld.answer.remove(idx);
+        } else if (type == 2) {
+          ld.answer.remove(idx);
+          if (ld.mask.indexOf(idx) == -1) {
+            ld.mask.add(idx);
+            ld.mask.sort();
+          }
+        }
+      });
+    }
+  }
+
+  List<Widget> _getWordsItems() {
+    List<Widget> widgets = List();
+    LevelData ld = level == -1 ? null : levelsData[level];
+    // Map<int, int> wordsMap = new Map();
+    // if (ld != null) {
+    //   for (int i = 0; i < ld.word.length; ++i) {
+    //     int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
+    //     wordsMap[pos] = i;
+    //   }
+    // }
+    for (int i = 0; i < 81; ++i) {
+      bool hasWord = curLvWordsMap.containsKey(i);
+      bool isSelect = hasWord && i == curSelectItemIdx;
+      String imgPath = '';
+      String word = '';
+      if (hasWord) {
+        int idx = curLvWordsMap[i];
+        // LevelData ld = levelsData[idx];
+        bool isMask = ld.mask.indexOf(idx) != -1;
+        bool isFixed = ld.answer.indexOf(idx) == -1;
+        imgPath = isMask ? "assets/image/game_tt_bg4.png" :
+          isFixed ? "assets/image/game_tt_bg3.png" : "assets/image/game_tt_bg2.png";
+        word = ld.word[idx];
+      }
+      FlatButton button = FlatButton(
+        child: Text(
+          word,
+        ),
+        onPressed: () => _switchCurSelectItemIdx(i),
+      );
+      if (hasWord) {
+        widgets.add(
+          Container(
+            alignment: Alignment.center,
+            child: Stack(
+              alignment: AlignmentDirectional.center,
+              children: <Widget>[
+                Image.asset(imgPath),
+                button,
+              ],
+            ),
+            color: isSelect ? Colors.red : Colors.black38,
+          ),
+        );
+      } else {
+        widgets.add(
+          Container(
+            alignment: Alignment.center,
+            child: button,
+            color: isSelect ? Colors.red : Colors.black38,
+          ),
+        );
+      }
+    }
+    return widgets;
+  }
+
+  List<Widget> _getFuncsItems() {
+    List<Widget> widgets = List();
+    widgets.add(
+      Padding(padding: EdgeInsets.all(8),),
+    );
+    widgets.add(
+      RaisedButton(
+        child: Text('打开'),
+        onPressed: () {
+          Tools.getFileText(_loadLevelData);
+        },
+      ),
+    );
+    widgets.add(
+      Padding(padding: EdgeInsets.all(8),),
+    );
+    widgets.add(
+      RaisedButton(
+        child: Text('保存'),
+        onPressed: () {
+        },
+      ),
+    );
+    if (level != -1 && curSelectItemIdx != -1) {
+      widgets.add(
+        Padding(padding: EdgeInsets.all(8),),
+      );
+      int type = _getCurItemType();
+      widgets.add(
+        Flexible(
+          child: RadioListTile(
+            value:2,
+            groupValue: type,
+            title: Text('Mask'),
+            onChanged:(v) => _switchCurItemType(2),
+          ),
+        ),
+      );
+      widgets.add(
+        Flexible(
+          child: RadioListTile(
+            value:1,
+            groupValue: type,
+            title: Text('Fixed'),
+            onChanged:(v) => _switchCurItemType(1),
+          ),
+        ),
+      );
+      widgets.add(
+        Flexible(
+          child: RadioListTile(
+            value:0,
+            groupValue: type,
+            title: Text('Normal'),
+            onChanged:(v) => _switchCurItemType(0),
+          ),
+        ),
+      );
+      widgets.add(
+        Padding(padding: EdgeInsets.all(8),),
+      );
+    }
+    return widgets;
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,22 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Padding(padding: EdgeInsets.all(4),),
             Row(
-              children: <Widget>[
-                Padding(padding: EdgeInsets.all(8),),
-                RaisedButton(
-                  child: Text('打开'),
-                  onPressed: () {
-                    Tools.getFileText(_loadLevelData);
-                  },
-                ),
-                Padding(padding: EdgeInsets.all(8),),
-                RaisedButton(
-                  child: Text('保存'),
-                  onPressed: () => {
-                    
-                  },
-                ),
-              ],
+              children: _getFuncsItems(),
             ),
             Padding(padding: EdgeInsets.all(4),),
             Expanded(
