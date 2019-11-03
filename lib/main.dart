@@ -51,37 +51,46 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _getWordsItems() {
     List<Widget> widgets = List();
     LevelData ld = level == -1 ? null : levelsData[level];
-    Map<int, String> wordsMap = new Map();
+    Map<int, int> wordsMap = new Map();
     if (ld != null) {
       for (int i = 0; i < ld.word.length; ++i) {
         int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
-        wordsMap[pos] = ld.word[i];
+        wordsMap[pos] = i;
       }
     }
     for (int i = 0; i < 81; ++i) {
-      widgets.add(
-        Container(
-          alignment: Alignment.center,
-          child: Text(
-            wordsMap.containsKey(i) ? wordsMap[i] : "",
-            style: TextStyle(color: Colors.white, fontSize: 20),
+      bool hasWord = wordsMap.containsKey(i);
+      if (hasWord) {
+        int idx = wordsMap[i];
+        // LevelData ld = levelsData[idx];
+        bool isMask = ld.mask.indexOf(idx) != -1;
+        bool isFixed = ld.answer.indexOf(idx) == -1;
+        String imgPath = isMask ? "assets/image/game_tt_bg4.png" :
+          isFixed ? "assets/image/game_tt_bg3.png" : "assets/image/game_tt_bg2.png";
+        String word = ld.word[idx];
+        widgets.add(
+          Stack(
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              Image.asset(imgPath),
+              Text(word),
+            ],
           ),
-          color: Colors.blue,
-        )
-      );
+        );
+      } else {
+        widgets.add(
+          Container(
+            alignment: Alignment.center,
+            child: Text(
+              "",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            color: Colors.black38,
+          ),
+        );
+      }
     }
     return widgets;
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      // _counter++;
-    });
   }
 
   void _loadLevelData(String txt) {
@@ -177,11 +186,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _incrementCounter,
+      //   tooltip: 'Increment',
+      //   child: Icon(Icons.add),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
