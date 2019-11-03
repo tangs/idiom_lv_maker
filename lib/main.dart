@@ -223,6 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
       RaisedButton(
         child: Text('Save'),
         onPressed: () {
+          Tools.saveFile();
         },
       ),
     );
