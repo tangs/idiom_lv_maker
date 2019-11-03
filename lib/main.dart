@@ -46,17 +46,26 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // int _counter = 0;
   List<LevelData> levelsData = new List();
+  Set<String> idiomsSet = new Set();
   int level = -1;
   int curSelectItemIdx = -1;
   Map<int, int> curLvWordsMap = new Map();
 
+  LevelData _getCurLvData() {
+    if (level < 0 || level > levelsData.length) return null;
+    return levelsData[level];
+  }
   void _loadLevelData(String txt) {
     setState(() {
       levelsData.clear();
+      idiomsSet.clear();
       dynamic json = new JsonDecoder().convert(txt);
       for (dynamic data in json) {
         LevelData ld = new LevelData.fromJson(data);
         levelsData.add(ld);
+        for (String idiom in ld.idiom) {
+          idiomsSet.add(idiom);
+        }
       }
     });
   }
@@ -67,18 +76,22 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _updateLvWordsMap() {
+    curLvWordsMap.clear();
+    LevelData ld = _getCurLvData();
+    if (ld != null) {
+      for (int i = 0; i < ld.word.length; ++i) {
+        int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
+        curLvWordsMap[pos] = i;
+      }
+    }
+  }
+
   void _switchLevel(lv) {
     setState(() {
-      curLvWordsMap.clear();
-      LevelData ld = lv == -1 ? null : levelsData[lv];
-      if (ld != null) {
-        for (int i = 0; i < ld.word.length; ++i) {
-          int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
-          curLvWordsMap[pos] = i;
-        }
-      }
       level = lv;
       curSelectItemIdx = -1;
+      _updateLvWordsMap();
     });
   }
 
@@ -96,11 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return -1;
   }
 
-  int _switchCurItemType(int type) {
+  void _switchCurItemType(int type) {
     if (level != -1 && curSelectItemIdx != -1) {
       LevelData ld = levelsData[level];
       bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
-      if (!hasWord) return 0;
+      if (!hasWord) return;
       int idx = curLvWordsMap[curSelectItemIdx];
       // String word = ld.word[idx];
       setState(() {
@@ -124,9 +137,41 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Widget _getCurIdiomList() {
+    List<String> idioms = new List();
+    LevelData ld = _getCurLvData();
+    if (ld != null && curSelectItemIdx != -1) {
+      // idioms = idiomsSet.toList();
+      bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
+      if (hasWord) {
+        int idx = curLvWordsMap[curSelectItemIdx];
+        String word = ld.word[idx];
+        for (String idiom in idiomsSet) {
+          if (idiom.indexOf(word) != -1) {
+            idioms.add(idiom);
+          }
+        }
+      }
+    }
+    return ListView.builder(
+      itemCount: idioms.length,
+      itemBuilder: (BuildContext context, int idx) {
+        return Center(
+          child: FlatButton(
+            child: Text(idioms[idx]),
+            onPressed: () {
+
+            },
+          ),
+        );
+      },
+      padding: EdgeInsets.all(4),
+    );
+  }
+
   List<Widget> _getWordsItems() {
     List<Widget> widgets = List();
-    LevelData ld = level == -1 ? null : levelsData[level];
+    // LevelData ld = level == -1 ? null : levelsData[level];
     // Map<int, int> wordsMap = new Map();
     // if (ld != null) {
     //   for (int i = 0; i < ld.word.length; ++i) {
@@ -140,6 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
       String imgPath = '';
       String word = '';
       if (hasWord) {
+        LevelData ld = _getCurLvData();
         int idx = curLvWordsMap[i];
         // LevelData ld = levelsData[idx];
         bool isMask = ld.mask.indexOf(idx) != -1;
@@ -151,6 +197,9 @@ class _MyHomePageState extends State<MyHomePage> {
       FlatButton button = FlatButton(
         child: Text(
           word,
+          style: TextStyle(
+            fontSize: 30
+          ),
         ),
         onPressed: () => _switchCurSelectItemIdx(i),
       );
@@ -266,15 +315,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   Container(
                     width: 200,
+                    // 关卡列表
                     child: ListView.builder(
                       itemCount: levelsData.length,
                       itemBuilder: (BuildContext context, int idx) {
                         return Center(
-                          // child: Text("第$idx关")
-                          // child: FlatButton(
-                          //   child: Text("第$idx关"),
-                          //   onPressed: () => _switchLevel(idx),
-                          // ),
                           child: RadioListTile(
                             value: idx,
                             groupValue: level,
@@ -300,7 +345,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       padding: EdgeInsets.all(10.0),
                       children: _getWordsItems(),
                     ),
-                  )
+                  ),
+                  Container(
+                    width: 200,
+                    // 当前可选成语列表
+                    child: _getCurIdiomList(),
+                  ),
                 ],
               ),
             ),
