@@ -46,6 +46,32 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // int _counter = 0;
   List<LevelData> levelsData = new List();
+  int level = -1;
+
+  List<Widget> _getWordsItems() {
+    List<Widget> widgets = List();
+    LevelData ld = level == -1 ? null : levelsData[level];
+    Map<int, String> wordsMap = new Map();
+    if (ld != null) {
+      for (int i = 0; i < ld.word.length; ++i) {
+        int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
+        wordsMap[pos] = ld.word[i];
+      }
+    }
+    for (int i = 0; i < 81; ++i) {
+      widgets.add(
+        Container(
+          alignment: Alignment.center,
+          child: Text(
+            wordsMap.containsKey(i) ? wordsMap[i] : "",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          color: Colors.blue,
+        )
+      );
+    }
+    return widgets;
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -70,14 +96,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _switchLevel(lv) {
-
+    setState(() {
+      level = lv;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(level == -1 ? widget.title : "第$level关"),
       ),
       body: Center(
         child: Column(
@@ -107,21 +135,42 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 children: <Widget>[
                   Container(
-                    width: 100,
+                    width: 200,
                     child: ListView.builder(
                       itemCount: levelsData.length,
                       itemBuilder: (BuildContext context, int idx) {
                         return Center(
                           // child: Text("第$idx关")
-                          child: FlatButton(
-                            child: Text("第$idx关"),
-                            onPressed: () => _switchLevel(idx),
+                          // child: FlatButton(
+                          //   child: Text("第$idx关"),
+                          //   onPressed: () => _switchLevel(idx),
+                          // ),
+                          child: RadioListTile(
+                            value: idx,
+                            groupValue: level,
+                            activeColor: Colors.red,
+                            onChanged: (t) => _switchLevel(idx),
+                            title: Text(
+                              "第$idx关",
+                              style: TextStyle(
+                                color: idx == level ? Colors.red : Colors.black,
+                              ),
+                            ),
                           ),
                         );
                       },
                       padding: EdgeInsets.all(4),
                     ),
                   ),
+                  Expanded(
+                    child: GridView.count(
+                      crossAxisCount: 9,
+                      crossAxisSpacing: 20.0,
+                      mainAxisSpacing: 20.0,
+                      padding: EdgeInsets.all(10.0),
+                      children: _getWordsItems(),
+                    ),
+                  )
                 ],
               ),
             ),
