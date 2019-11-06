@@ -4,6 +4,7 @@ import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'tools.dart';
 import 'idiom_data.dart';
@@ -56,18 +57,34 @@ class _MyHomePageState extends State<MyHomePage> {
     if (level < 0 || level > levelsData.length) return null;
     return levelsData[level];
   }
+
+  void _loadIdioms(BuildContext context) {
+    if (idiomsSet.length > 0) return;
+      // AssetBundle.loadString('assets/idioms.json');
+    DefaultAssetBundle.of(context).loadString('assets/config/idioms.json').then((onValue) {
+      // debugPrint(onValue);
+      setState(() {
+        // idiomsSet.clear();
+        List<dynamic> idioms = jsonDecode(onValue);
+        for (String idiom in idioms) {
+          idiomsSet.add(idiom);
+        }
+      });
+    });
+  }
+
   void _loadLevelData(String txt) {
     setState(() {
       levelsData.clear();
-      idiomsSet.clear();
+      // idiomsSet.clear();
       dynamic json = new JsonDecoder().convert(txt);
       for (dynamic data in json) {
         LevelData ld = new LevelData.fromJson(data);
         LocalLevelData lld = LocalLevelData.fromLevelData(ld);
         levelsData.add(lld);
-        for (String idiom in ld.idiom) {
-          idiomsSet.add(idiom);
-        }
+        // for (String idiom in ld.idiom) {
+        //   idiomsSet.add(idiom);
+        // }
       }
     });
   }
@@ -333,6 +350,7 @@ class _MyHomePageState extends State<MyHomePage> {
   
   @override
   Widget build(BuildContext context) {
+    _loadIdioms(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(level == -1 ? widget.title : "第$level关"),
