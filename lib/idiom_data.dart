@@ -140,11 +140,6 @@ class LevelData {
 
 class LocalLevelData {
   int id;
-  // List<int> posx;
-  // List<int> posy;
-  // List<int> answer;
-  // List<String> word;
-  // List<int> mask;
   int levelup;
   int hero;
   List<String> idiom;
@@ -153,15 +148,6 @@ class LocalLevelData {
   List<String> words;
   // 0.normal 1.fixed 2.mask 3.no word
   List<int> types;
-
-  // LocalLevelData({
-  //   this.id,
-  //   this.levelup,
-  //   this.hero,
-  //   this.idiom,
-  //   this.wifenum,
-  //   this.house,
-  // });
 
   bool hasWord(int idx) {
     return types[idx] != 3;
@@ -214,6 +200,21 @@ class LocalLevelData {
       return cnt < 2;
     }
     return false;
+  }
+
+  void addWord(int idx, String word) {
+    words[idx] = word;
+    types[idx] = 0;
+  }
+
+  void setWord(int idx, String word) {
+    if (word.length > 0) {
+      types[idx] = 0;
+      words[idx] = word.substring(0, 1);
+    } else {
+      types[idx] = 3;
+      words[idx] = '';
+    }
   }
 
   void rmWord(int idx) {

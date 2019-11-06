@@ -4,7 +4,6 @@ import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'tools.dart';
 import 'idiom_data.dart';
@@ -82,9 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
         LevelData ld = new LevelData.fromJson(data);
         LocalLevelData lld = LocalLevelData.fromLevelData(ld);
         levelsData.add(lld);
-        // for (String idiom in ld.idiom) {
-        //   idiomsSet.add(idiom);
-        // }
       }
     });
   }
@@ -95,22 +91,10 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // void _updateLvWordsMap() {
-  //   curLvWordsMap.clear();
-  //   LocalLevelData ld = _getCurLvData();
-  //   if (ld != null) {
-  //     for (int i = 0; i < ld.word.length; ++i) {
-  //       int pos = ld.posx[i] + (8 - ld.posy[i]) * 9;
-  //       curLvWordsMap[pos] = i;
-  //     }
-  //   }
-  // }
-
   void _switchLevel(lv) {
     setState(() {
       level = lv;
       curSelectItemIdx = -1;
-      // _updateLvWordsMap();
     });
   }
 
@@ -283,6 +267,26 @@ class _MyHomePageState extends State<MyHomePage> {
       widgets.add(
         Padding(padding: EdgeInsets.all(8),),
       );
+      String word = lld.words[curSelectItemIdx];
+      widgets.add(
+        Flexible(
+          child: TextField(
+            controller: new TextEditingController(text: word),
+            onChanged: (String txt) {
+              lld.setWord(curSelectItemIdx, txt);
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: '修改文字',
+            ),
+            // maxLength: 1,
+          )
+        ),
+      );
+      widgets.add(
+        Padding(padding: EdgeInsets.all(8),),
+      );
+
       if (lld.isRemoveable(curSelectItemIdx, true)) {
         widgets.add(
           RaisedButton(
