@@ -209,7 +209,8 @@ class LocalLevelData {
 
   void setWord(int idx, String word) {
     if (word.length > 0) {
-      types[idx] = 0;
+      if (types[idx] == 3)
+        types[idx] = 0;
       words[idx] = word.substring(0, 1);
     } else {
       types[idx] = 3;
@@ -277,10 +278,9 @@ class LocalLevelData {
     for (int i = 0; i < 81; ++i) {
       int type = types[i];
       if (type != 3) {
-        word[idx] = words[i];
-        posx[idx] = i % 9;
-        posy[idx] = 8 - (i / 9).floor();
-        ++idx;
+        word.add(words[i]);
+        posx.add(i % 9);
+        posy.add(8 - (i / 9).floor());
         switch (type) {
           case 0: {
             answer.add(idx);
@@ -295,6 +295,7 @@ class LocalLevelData {
           }
           break;
         }
+        ++idx;
       }
     }
     ld.posx = posx;

@@ -224,7 +224,18 @@ class _MyHomePageState extends State<MyHomePage> {
       RaisedButton(
         child: Text('Save'),
         onPressed: () {
-          Tools.saveFile();
+          StringBuffer buffer = new StringBuffer('[');
+          int len = levelsData.length;
+          for (int i = 0; i < len; ++i) {
+            LocalLevelData data = levelsData[i];
+            LevelData ld = data.toLevelData();
+            final string = jsonEncode(ld.toJson());
+            buffer.write(string);
+            if (i < len - 1) buffer.write(',');
+            buffer.write('\n');
+          }
+          buffer.write(']');
+          Tools.saveFile(buffer.toString());
         },
       ),
     );
