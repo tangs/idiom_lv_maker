@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'tools.dart';
@@ -157,6 +158,22 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _addIdiom(SelectableInfo info) {
+    setState(() {
+      LocalLevelData ld = _getCurLvData();
+      if (ld != null) {
+        int idx = curSelectItemIdx - info.index * (info.isHor ? 1 : 9);
+        for (int i = 0; i < 4; ++i) {
+          if (idx != curSelectItemIdx) {
+            ld.addWord(idx, info.idiom[i]);
+          } 
+          if (info.isHor) idx++; else idx += 9;
+        }
+      }
+      _buildSelectableInfos();
+    });
+  }
+
   Widget _getCurIdiomList() {
     // List<String> idioms = new List();
     List<SelectableInfo> infos = selectableInfos;
@@ -164,24 +181,42 @@ class _MyHomePageState extends State<MyHomePage> {
       itemCount: infos.length,
       itemBuilder: (BuildContext context, int idx) {
         SelectableInfo info = infos[idx];
+        String idiom = info.idiom;
         return Center(
-          child: FlatButton(
-            child: Text(info.idiom),
-            onPressed: () {
-              setState(() {
-                LocalLevelData ld = _getCurLvData();
-                if (ld != null) {
-                  int idx = curSelectItemIdx - info.index * (info.isHor ? 1 : 9);
-                  for (int i = 0; i < 4; ++i) {
-                    if (idx != curSelectItemIdx) {
-                      ld.addWord(idx, info.idiom[i]);
-                    } 
-                    if (info.isHor) idx++; else idx += 9;
-                  }
-                }
-              });
-            },
+          child: RichText(
+            text: TextSpan(
+              text: idiom.substring(0, info.index).toString(),
+              style: TextStyle(color: Colors.black),
+              children: [
+                TextSpan(
+                  text: idiom.substring(info.index, info.index + 1).toString(),
+                  style: TextStyle(color: Colors.red),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _addIdiom(info);
+                    },
+                ),
+                TextSpan(
+                  text: idiom.substring(info.index + 1, idiom.length).toString(),
+                  style: TextStyle(color: Colors.black),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _addIdiom(info);
+                    },
+                ),
+              ],
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  _addIdiom(info);
+                },
+            ),
           ),
+          // child: FlatButton(
+          //   child: Text(info.idiom),
+          //   onPressed: () {
+          //     _addIdiom(info);
+          //   },
+          // ),
         );
       },
       padding: EdgeInsets.all(4),
