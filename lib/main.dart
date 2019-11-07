@@ -172,9 +172,10 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       LocalLevelData ld = _getCurLvData();
       if (ld != null) {
+        bool hasWordCurLv = ld.hasWordCurLv();
         int idx = curSelectItemIdx - info.index * (info.isHor ? 1 : 9);
         for (int i = 0; i < 4; ++i) {
-          if (idx != curSelectItemIdx) {
+          if (!hasWordCurLv || idx != curSelectItemIdx) {
             ld.addWord(idx, info.idiom[i]);
           } 
           if (info.isHor) idx++; else idx += 9;
