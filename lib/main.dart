@@ -21,6 +21,12 @@ void main() {
   runApp(MyApp());
 }
 
+class SelectableInfo {
+  String idiom;
+  int index;
+  bool isHor;
+}
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -47,6 +53,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // int _counter = 0;
   List<LocalLevelData> levelsData = new List();
+  List<SelectableInfo> selectableInfos = new List();
   Set<String> idiomsSet = new Set();
   int level = -1;
   int curSelectItemIdx = -1;
@@ -88,6 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _switchCurSelectItemIdx(int idx) {
     setState(() {
       curSelectItemIdx = idx;
+      _buildSelectableInfos();
     });
   }
 
@@ -95,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       level = lv;
       curSelectItemIdx = -1;
+      _buildSelectableInfos();
     });
   }
 
@@ -116,31 +125,61 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget _getCurIdiomList() {
-    List<String> idioms = new List();
-    LocalLevelData ld = _getCurLvData();
-    if (ld != null && curSelectItemIdx != -1) {
-      // idioms = idiomsSet.toList();
-      // bool hasWord = curLvWordsMap.containsKey(curSelectItemIdx);
-      String word = ld.words[curSelectItemIdx];
-      if (word.length > 0) {
-        // int idx = curLvWordsMap[curSelectItemIdx];
-        // String word = ld.word[idx];
-        for (String idiom in idiomsSet) {
-          if (idiom.indexOf(word) != -1) {
-            idioms.add(idiom);
+  void _buildSelectableInfos() {
+    setState(() {
+      selectableInfos.clear();
+      LocalLevelData ld = _getCurLvData();
+      int idx = curSelectItemIdx;
+      if (ld != null && idx != -1) {
+        List<int> idxsHor = ld.getPushIdiomIdxs(idx, true);
+        List<int> idxsVer = ld.getPushIdiomIdxs(idx, false);
+        Function fun = (List<int> idxs, bool isHor) {
+          if (idxs != null && idxs.length > 0) {
+            String word = ld.words[idx];
+            if (word.length > 0) {
+              for (String idiom in idiomsSet) {
+                int idx = idiom.indexOf(word);
+                if (idx != -1 && idxs.indexOf(idx) != -1) {
+                  // idioms.add(idiom);
+                  SelectableInfo si = SelectableInfo();
+                  si.idiom = idiom;
+                  si.index = idx;
+                  si.isHor = isHor;
+                  selectableInfos.add(si);
+                }
+              }
+            }
           }
-        }
+        };
+        fun(idxsHor, true);
+        fun(idxsVer, false);
       }
-    }
+    });
+  }
+
+  Widget _getCurIdiomList() {
+    // List<String> idioms = new List();
+    List<SelectableInfo> infos = selectableInfos;
     return ListView.builder(
-      itemCount: idioms.length,
+      itemCount: infos.length,
       itemBuilder: (BuildContext context, int idx) {
+        SelectableInfo info = infos[idx];
         return Center(
           child: FlatButton(
-            child: Text(idioms[idx]),
+            child: Text(info.idiom),
             onPressed: () {
-
+              setState(() {
+                LocalLevelData ld = _getCurLvData();
+                if (ld != null) {
+                  int idx = curSelectItemIdx - info.index * (info.isHor ? 1 : 9);
+                  for (int i = 0; i < 4; ++i) {
+                    if (idx != curSelectItemIdx) {
+                      ld.addWord(idx, info.idiom[i]);
+                    } 
+                    if (info.isHor) idx++; else idx += 9;
+                  }
+                }
+              });
             },
           ),
         );
@@ -245,39 +284,63 @@ class _MyHomePageState extends State<MyHomePage> {
         Padding(padding: EdgeInsets.all(8),),
       );
       int type = _getCurItemType();
-      widgets.add(
-        Flexible(
-          child: RadioListTile(
-            value:2,
-            groupValue: type,
-            title: Text('Mask'),
-            onChanged:(v) => _switchCurItemType(2),
+      if (lld.hasWord(curSelectItemIdx)) {
+      // 选择当前文字状态
+        widgets.add(
+          Flexible(
+            child: RadioListTile(
+              value:2,
+              groupValue: type,
+              title: Text('Mask'),
+              onChanged:(v) => _switchCurItemType(2),
+            ),
           ),
-        ),
-      );
-      widgets.add(
-        Flexible(
-          child: RadioListTile(
-            value:1,
-            groupValue: type,
-            title: Text('Fixed'),
-            onChanged:(v) => _switchCurItemType(1),
+        );
+        widgets.add(
+          Flexible(
+            child: RadioListTile(
+              value:1,
+              groupValue: type,
+              title: Text('Fixed'),
+              onChanged:(v) => _switchCurItemType(1),
+            ),
           ),
-        ),
-      );
-      widgets.add(
-        Flexible(
-          child: RadioListTile(
-            value:0,
-            groupValue: type,
-            title: Text('Normal'),
-            onChanged:(v) => _switchCurItemType(0),
+        );
+        widgets.add(
+          Flexible(
+            child: RadioListTile(
+              value:0,
+              groupValue: type,
+              title: Text('Normal'),
+              onChanged:(v) => _switchCurItemType(0),
+            ),
           ),
-        ),
-      );
-      widgets.add(
-        Padding(padding: EdgeInsets.all(8),),
-      );
+        );
+        widgets.add(
+          Padding(padding: EdgeInsets.all(8),),
+        );
+        // 删除文字
+        widgets.add(
+          RaisedButton(
+            child: Text('RM Word'),
+            onPressed: () {
+              if (level != -1 && curSelectItemIdx != -1) {
+                setState(() {
+                  LocalLevelData lld = _getCurLvData();
+                  if (lld != null) {
+                    lld.rmWord(curSelectItemIdx);
+                    _buildSelectableInfos();
+                  }
+                });
+              }
+            },
+          ),
+        );
+        widgets.add(
+          Padding(padding: EdgeInsets.all(8),),
+        );
+      }
+      // 修改文字
       String word = lld.words[curSelectItemIdx];
       widgets.add(
         Flexible(
@@ -285,6 +348,7 @@ class _MyHomePageState extends State<MyHomePage> {
             controller: new TextEditingController(text: word),
             onChanged: (String txt) {
               lld.setWord(curSelectItemIdx, txt);
+              _buildSelectableInfos();
             },
             decoration: InputDecoration(
               border: OutlineInputBorder(),
@@ -298,6 +362,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Padding(padding: EdgeInsets.all(8),),
       );
 
+      // 删除水平方向成语
       if (lld.isRemoveable(curSelectItemIdx, true)) {
         widgets.add(
           RaisedButton(
@@ -309,6 +374,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   if (lld != null) {
                     // lld.rmWord(curSelectItemIdx);
                     lld.rmIdiom(curSelectItemIdx, true);
+                    _buildSelectableInfos();
                   }
                 });
               }
@@ -321,6 +387,7 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       }
 
+      // 删除竖直方向成语
       if (lld.isRemoveable(curSelectItemIdx, false)) {
         widgets.add(
           RaisedButton(
@@ -332,6 +399,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   if (lld != null) {
                     // lld.rmWord(curSelectItemIdx);
                     lld.rmIdiom(curSelectItemIdx, false);
+                    _buildSelectableInfos();
                   }
                 });
               }
@@ -343,6 +411,7 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       }
       
+      // 删除所有文字
       widgets.add(
         RaisedButton(
           child: Text('RM ALL'),
@@ -351,6 +420,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 LocalLevelData lld = _getCurLvData();
                 if (lld != null) {
                   lld.rmAllWord();
+                  _buildSelectableInfos();
                 }
               });
           },

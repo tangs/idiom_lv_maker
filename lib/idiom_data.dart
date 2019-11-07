@@ -184,6 +184,37 @@ class LocalLevelData {
     return idiom;
   }
 
+  bool canPushWord(int row, int col, int withoutIdx) {
+    if (row < 0 || row > 8 || col < 0 || col > 8) return false;
+    int idx = row * 9 + col;
+    if (idx == withoutIdx) return true;
+    if (col < 0 || (col == 0 || (hasWord(idx - 1) && idx - 1 != withoutIdx))) return false;
+    if (col > 8 || (col == 8 || (hasWord(idx + 1) && idx + 1 != withoutIdx))) return false;
+    if (row < 0 || (row == 0 || (hasWord(idx - 9) && idx - 9 != withoutIdx))) return false;
+    if (row > 8 || (row == 8 || (hasWord(idx + 9) && idx + 9 != withoutIdx))) return false;
+    return true;
+  }
+
+  List<int> getPushIdiomIdxs(int idx, bool isHor) {
+    int withoutIdx = hasWord(idx) ? idx : -1;
+    List<int> idxs = List();
+    int sRow = (idx / 9).floor();
+    int sCol = idx % 9;
+    for (int i = 0; i < 4; ++i) {
+      bool isSucc = true;
+      int row = sRow;
+      int col = sCol;
+      for (int j = 0; j < 4; ++j) {
+        if (!canPushWord(row, col, withoutIdx)) isSucc = false;
+        if (isHor) col++; else row++;
+      }
+      if (isSucc) idxs.add(i);
+      if (isHor) sCol--; else sRow--;
+      if (sCol < 0 || sRow < 0) break;
+    }
+    return idxs;
+  }
+
   bool hasIdiom(int idx, bool isHor) {
     return getIdiomIdx(idx, isHor).length == 4;
   }
