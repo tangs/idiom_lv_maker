@@ -139,15 +139,21 @@ class _MyHomePageState extends State<MyHomePage> {
             String word = ld.words[idx];
             if (word.length > 0) {
               for (String idiom in idiomsSet) {
-                int idx = idiom.indexOf(word);
-                if (idx != -1 && idxs.indexOf(idx) != -1) {
-                  // idioms.add(idiom);
-                  SelectableInfo si = SelectableInfo();
-                  si.idiom = idiom;
-                  si.index = idx;
-                  si.isHor = isHor;
-                  selectableInfos.add(si);
-                }
+                int start = 0;
+                do {
+                  int idx = idiom.indexOf(word, start);
+                  if (idx != -1 && idxs.indexOf(idx) != -1) {
+                    // idioms.add(idiom);
+                    SelectableInfo si = SelectableInfo();
+                    si.idiom = idiom;
+                    si.index = idx;
+                    si.isHor = isHor;
+                    selectableInfos.add(si);
+                    start = idx + 1;
+                  } else {
+                    break;
+                  }
+                } while (true);
               }
             }
           }
@@ -198,6 +204,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 TextSpan(
                   text: idiom.substring(info.index + 1, idiom.length).toString(),
+                  style: TextStyle(color: Colors.black),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _addIdiom(info);
+                    },
+                ),
+                TextSpan(
+                  text: '[' + (info.isHor ? '水平' : '竖直') + ']',
                   style: TextStyle(color: Colors.black),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
