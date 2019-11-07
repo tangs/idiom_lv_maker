@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Idiom Level Maker',
       theme: ThemeData(
@@ -59,7 +60,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int level = -1;
   int curSelectItemIdx = -1;
   String idiomKeyword = '';
-  // Map<int, int> curLvWordsMap = new Map();
 
   LocalLevelData _getCurLvData() {
     if (level < 0 || level > levelsData.length) return null;
@@ -81,7 +81,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _loadLevelData(String txt) {
+  void _loadLevelData(int error, String txt) {
+    if (error != 0) return;
     setState(() {
       levelsData.clear();
       // idiomsSet.clear();
