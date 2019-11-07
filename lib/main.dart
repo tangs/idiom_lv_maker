@@ -133,6 +133,8 @@ class _MyHomePageState extends State<MyHomePage> {
       int idx = curSelectItemIdx;
       if (ld != null && idx != -1) {
         bool hasWordCurLv = ld.hasWordCurLv();
+        bool hasHorIdiom = ld.hasIdiom(idx, true);
+        bool hasVerIdiom = ld.hasIdiom(idx, false);
         List<int> idxsHor = ld.getPushIdiomIdxs(idx, true);
         List<int> idxsVer = ld.getPushIdiomIdxs(idx, false);
         Function fun = (List<int> idxs, bool isHor) {
@@ -162,8 +164,8 @@ class _MyHomePageState extends State<MyHomePage> {
             }
           }
         };
-        fun(idxsHor, true);
-        fun(idxsVer, false);
+        if (!hasHorIdiom) fun(idxsHor, true);
+        if (!hasVerIdiom) fun(idxsVer, false);
       }
     });
   }

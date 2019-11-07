@@ -197,8 +197,8 @@ class LocalLevelData {
     if (idx == withoutIdx) return true;
     if (col > 0 && (hasWord(idx - 1) && idx - 1 != withoutIdx)) return false;
     if (col < 8 && (hasWord(idx + 1) && idx + 1 != withoutIdx)) return false;
-    if (row < 0 && (hasWord(idx - 9) && idx - 9 != withoutIdx)) return false;
-    if (row > 8 && (hasWord(idx + 9) && idx + 9 != withoutIdx)) return false;
+    if (row > 0 && (hasWord(idx - 9) && idx - 9 != withoutIdx)) return false;
+    if (row < 8 && (hasWord(idx + 9) && idx + 9 != withoutIdx)) return false;
     return true;
   }
 
