@@ -58,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Set<String> idiomsSet = new Set();
   int level = -1;
   int curSelectItemIdx = -1;
+  String idiomKeyword = '';
   // Map<int, int> curLvWordsMap = new Map();
 
   LocalLevelData _getCurLvData() {
@@ -93,9 +94,17 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _setIdiomKeyword(String keyword) {
+    setState(() {
+      idiomKeyword = keyword == null ? '' : keyword;
+      _buildSelectableInfos();
+    });
+  }
+
   void _switchCurSelectItemIdx(int idx) {
     setState(() {
       curSelectItemIdx = idx;
+      _setIdiomKeyword('');
       _buildSelectableInfos();
     });
   }
@@ -103,8 +112,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void _switchLevel(lv) {
     setState(() {
       level = lv;
-      curSelectItemIdx = -1;
       _buildSelectableInfos();
+      _switchCurSelectItemIdx(-1);
     });
   }
 
@@ -154,7 +163,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     si.idiom = idiom;
                     si.index = idx;
                     si.isHor = isHor;
-                    selectableInfos.add(si);
+                    if (idiomKeyword.length == 0 || idiom.indexOf(idiomKeyword) != -1) {
+                      selectableInfos.add(si);
+                    }
                     start = idx + 1;
                   } else {
                     break;
@@ -267,6 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       FlatButton button = FlatButton(
+        padding: EdgeInsets.all(0),
         child: Text(
           word,
         ),
@@ -306,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     widgets.add(
       RaisedButton(
-        child: Text('Open'),
+        child: Text('打开'),
         onPressed: () {
           Tools.getFileText(_loadLevelData);
         },
@@ -317,7 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     widgets.add(
       RaisedButton(
-        child: Text('Save'),
+        child: Text('下载'),
         onPressed: () {
           StringBuffer buffer = new StringBuffer('[');
           int len = levelsData.length;
@@ -347,7 +359,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: RadioListTile(
               value:2,
               groupValue: type,
-              title: Text('Mask'),
+              title: Text('隐藏'),
               onChanged:(v) => _switchCurItemType(2),
             ),
           ),
@@ -357,7 +369,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: RadioListTile(
               value:1,
               groupValue: type,
-              title: Text('Fixed'),
+              title: Text('固定'),
               onChanged:(v) => _switchCurItemType(1),
             ),
           ),
@@ -367,7 +379,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: RadioListTile(
               value:0,
               groupValue: type,
-              title: Text('Normal'),
+              title: Text('普通'),
               onChanged:(v) => _switchCurItemType(0),
             ),
           ),
@@ -375,10 +387,24 @@ class _MyHomePageState extends State<MyHomePage> {
         widgets.add(
           Padding(padding: EdgeInsets.all(8),),
         );
+      }
+    }
+    return widgets;
+  }
+
+  List<Widget> _getFuncsItems1() {
+    List<Widget> widgets = List();
+    widgets.add(
+      Padding(padding: EdgeInsets.all(8),),
+    );
+    if (level != -1 && curSelectItemIdx != -1) {
+      LocalLevelData lld = _getCurLvData();
+      if (lld.hasWord(curSelectItemIdx)) {
+      // 选择当前文字状态
         // 删除文字
         widgets.add(
           RaisedButton(
-            child: Text('RM Word'),
+            child: Text('删字'),
             onPressed: () {
               if (level != -1 && curSelectItemIdx != -1) {
                 setState(() {
@@ -402,7 +428,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Flexible(
           child: TextField(
             controller: new TextEditingController(text: word),
-            onChanged: (String txt) {
+            onSubmitted: (String txt) {
               lld.setWord(curSelectItemIdx, txt);
               _buildSelectableInfos();
             },
@@ -422,7 +448,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (lld.isRemoveable(curSelectItemIdx, true)) {
         widgets.add(
           RaisedButton(
-            child: Text('RM Hor'),
+            child: Text('删成语(H)'),
             onPressed: () {
               if (level != -1 && curSelectItemIdx != -1) {
                 setState(() {
@@ -447,7 +473,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (lld.isRemoveable(curSelectItemIdx, false)) {
         widgets.add(
           RaisedButton(
-            child: Text('RM Ver'),
+            child: Text('删成语(V)'),
             onPressed: () {
               if (level != -1 && curSelectItemIdx != -1) {
                 setState(() {
@@ -470,7 +496,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // 删除所有文字
       widgets.add(
         RaisedButton(
-          child: Text('RM ALL'),
+          child: Text('清空'),
           onPressed: () {
             setState(() {
                 LocalLevelData lld = _getCurLvData();
@@ -504,10 +530,14 @@ class _MyHomePageState extends State<MyHomePage> {
             Row(
               children: _getFuncsItems(),
             ),
+            Row(
+              children: _getFuncsItems1(),
+            ),
             Padding(padding: EdgeInsets.all(4),),
             Expanded(
               child: Row(
                 children: <Widget>[
+                  Padding(padding: EdgeInsets.all(8),),
                   Container(
                     width: 200,
                     // 关卡列表
@@ -543,9 +573,30 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   Container(
                     width: 200,
-                    // 当前可选成语列表
-                    child: _getCurIdiomList(),
+                    child: Column(
+                      children: <Widget>[
+                        TextField(
+                          controller: new TextEditingController(text: idiomKeyword),
+                          onSubmitted: (String txt) {
+                            _setIdiomKeyword(txt);
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: '搜索成语',
+                          ),
+                        ),
+                        Expanded(
+                          child: _getCurIdiomList(),
+                        )
+                      ],
+                    ),
                   ),
+                  Padding(padding: EdgeInsets.all(8),),
+                  // Container(
+                  //   width: 200,
+                  //   // 当前可选成语列表
+                  //   child: _getCurIdiomList(),
+                  // ),
                 ],
               ),
             ),
