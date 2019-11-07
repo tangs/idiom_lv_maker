@@ -149,6 +149,13 @@ class LocalLevelData {
   // 0.normal 1.fixed 2.mask 3.no word
   List<int> types;
 
+  bool hasWordCurLv() {
+    for (int type in types) {
+      if (type != 3) return true;
+    }
+    return false;
+  }
+
   bool hasWord(int idx) {
     return types[idx] != 3;
   }

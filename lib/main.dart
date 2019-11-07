@@ -132,16 +132,20 @@ class _MyHomePageState extends State<MyHomePage> {
       LocalLevelData ld = _getCurLvData();
       int idx = curSelectItemIdx;
       if (ld != null && idx != -1) {
+        bool hasWordCurLv = ld.hasWordCurLv();
         List<int> idxsHor = ld.getPushIdiomIdxs(idx, true);
         List<int> idxsVer = ld.getPushIdiomIdxs(idx, false);
         Function fun = (List<int> idxs, bool isHor) {
           if (idxs != null && idxs.length > 0) {
             String word = ld.words[idx];
-            if (word.length > 0) {
+            if (!hasWordCurLv || word.length > 0) {
               for (String idiom in idiomsSet) {
                 int start = 0;
                 do {
                   int idx = idiom.indexOf(word, start);
+                  if (!hasWordCurLv) {
+                    idx = start;
+                  }
                   if (idx != -1 && idxs.indexOf(idx) != -1) {
                     // idioms.add(idiom);
                     SelectableInfo si = SelectableInfo();
