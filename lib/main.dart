@@ -67,6 +67,10 @@ class _MyHomePageState extends State<MyHomePage> {
   int level = -1;
   int curSelectItemIdx = -1;
   String idiomKeyword = '';
+  bool showAppendIdiom = true;
+  bool showReplaceIdiom = true;
+  bool showHorIdiom = true;
+  bool showVerIdiom = true;
 
   LocalLevelData _getCurLvData() {
     if (level < 0 || level > levelsData.length) return null;
@@ -199,25 +203,29 @@ class _MyHomePageState extends State<MyHomePage> {
           List<int> idiomIdxs = ld.getIdiomIdx(idx, isHor);
           // bool hasIdiom = ld.hasIdiom(idx, isHor);
           if (idiomIdxs.length != 4) {
-            appendIdiom(idxs, isHor);
+            if (showAppendIdiom) {
+              appendIdiom(idxs, isHor);
+            }
           } else if (info.length == 4) {
-            String curIdiom = ld.getIdiom(idx, isHor);
-            // contains idiom
-            for (String idiom in idiomsSet) {
-              if (check(idiom, info) && idiom != curIdiom) {
-                SelectableInfo si = SelectableInfo();
-                si.type = SelectableType.Replace;
-                si.idiom = idiom;
-                si.firstWordIdx = idiomIdxs[0];
-                si.selectableTxt = info;
-                si.isHor = isHor;
-                selectableInfos.add(si);
+            if (showReplaceIdiom) {
+              String curIdiom = ld.getIdiom(idx, isHor);
+              // contains idiom
+              for (String idiom in idiomsSet) {
+                if (check(idiom, info) && idiom != curIdiom) {
+                  SelectableInfo si = SelectableInfo();
+                  si.type = SelectableType.Replace;
+                  si.idiom = idiom;
+                  si.firstWordIdx = idiomIdxs[0];
+                  si.selectableTxt = info;
+                  si.isHor = isHor;
+                  selectableInfos.add(si);
+                }
               }
             }
           }
         };
-        fun(idx, true);
-        fun(idx, false);
+        if (showHorIdiom) fun(idx, true);
+        if (showVerIdiom) fun(idx, false);
       }
     });
   }
@@ -639,6 +647,58 @@ class _MyHomePageState extends State<MyHomePage> {
                             border: OutlineInputBorder(),
                             labelText: '搜索成语',
                           ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Checkbox(
+                              value: showHorIdiom,
+                              onChanged: (bool val) {
+                                setState(() {
+                                  showHorIdiom = val;
+                                  _buildSelectableInfos();
+                                });
+                              },
+                            ),
+                            Text('水平'),
+                            Padding(padding: EdgeInsets.all(8),),
+                            Checkbox(
+                              value: showVerIdiom,
+                              onChanged: (bool val) {
+                                setState(() {
+                                  showVerIdiom = val;
+                                  _buildSelectableInfos();
+                                });
+                              },
+                            ),
+                            Text('竖直'),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Checkbox(
+                              value: showAppendIdiom,
+                              onChanged: (bool val) {
+                                setState(() {
+                                  showAppendIdiom = val;
+                                  _buildSelectableInfos();
+                                });
+                              },
+                            ),
+                            Text('新增'),
+                            Padding(padding: EdgeInsets.all(8),),
+                            Checkbox(
+                              value: showReplaceIdiom,
+                              onChanged: (bool val) {
+                                setState(() {
+                                  showReplaceIdiom = val;
+                                  _buildSelectableInfos();
+                                });
+                              },
+                            ),
+                            Text('替换'),
+                          ],
                         ),
                         Expanded(
                           child: _getCurIdiomList(),
