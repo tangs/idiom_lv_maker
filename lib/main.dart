@@ -67,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int level = -1;
   int curSelectItemIdx = -1;
   String idiomKeyword = '';
+  String searchLv = '';
   bool showAppendIdiom = true;
   bool showReplaceIdiom = true;
   bool showHorIdiom = true;
@@ -578,6 +579,58 @@ class _MyHomePageState extends State<MyHomePage> {
     return widgets;
   }
   
+  Widget _getLvCell(int idx) {
+    return RadioListTile(
+      // isThreeLine: true,
+      value: idx,
+      groupValue: level,
+      activeColor: Colors.red,
+      onChanged: (t) => _switchLevel(idx),
+      title: Text(
+        'LV $idx',
+        style: TextStyle(
+          color: idx == level ? Colors.red : Colors.black,
+        ),
+      ),
+      // subtitle: FlatButton(
+      //   padding: EdgeInsets.all(0),
+      //   child: Text('插入'),
+      //   onPressed: () => {
+
+      //   },
+      // ),
+      // title: FlatButton(
+      //   padding: EdgeInsets.all(0),
+      //   child: Text('删除'),
+      //   onPressed: () => {
+
+      //   },
+      // ),
+    );
+  }
+
+  Widget _getLvsItem() {
+    if (searchLv.length > 0) {
+      int lv = int.parse(searchLv);
+      if (lv >= 0 && lv <= levelsData.length) {
+        return _getLvCell(lv);
+      } else {
+        return Center();
+      }
+    }
+    return Scrollbar(
+      child: ListView.builder(
+        itemCount: levelsData.length,
+        itemBuilder: (BuildContext context, int idx) {
+          return Center(
+            child: _getLvCell(idx),
+          );
+        },
+        padding: EdgeInsets.all(4),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _loadIdioms(context);
@@ -602,29 +655,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   Padding(padding: EdgeInsets.all(8),),
                   Container(
-                    width: 200,
-                    // 关卡列表
-                    child: ListView.builder(
-                      itemCount: levelsData.length,
-                      itemBuilder: (BuildContext context, int idx) {
-                        return Center(
-                          child: RadioListTile(
-                            value: idx,
-                            groupValue: level,
-                            activeColor: Colors.red,
-                            onChanged: (t) => _switchLevel(idx),
-                            title: Text(
-                              "第$idx关",
-                              style: TextStyle(
-                                color: idx == level ? Colors.red : Colors.black,
-                              ),
-                            ),
+                    width: 160,
+                    child: Column(
+                      children: <Widget>[
+                        TextField(
+                          keyboardType: TextInputType.number,
+                          controller: new TextEditingController(text: searchLv),
+                          onSubmitted: (String txt) {
+                            setState(() {
+                              searchLv = txt;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: '搜索关卡',
                           ),
-                        );
-                      },
-                      padding: EdgeInsets.all(4),
+                        ),
+                        // 关卡列表
+                        Expanded(
+                          child: _getLvsItem(),
+                        )
+                      ],
                     ),
                   ),
+                  Padding(padding: EdgeInsets.all(8),),
                   Expanded(
                     child: GridView.count(
                       crossAxisCount: 9,
@@ -634,6 +688,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: _getWordsItems(),
                     ),
                   ),
+                  Padding(padding: EdgeInsets.all(8),),
                   Container(
                     width: 200,
                     child: Column(
@@ -707,11 +762,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   Padding(padding: EdgeInsets.all(8),),
-                  // Container(
-                  //   width: 200,
-                  //   // 当前可选成语列表
-                  //   child: _getCurIdiomList(),
-                  // ),
                 ],
               ),
             ),
