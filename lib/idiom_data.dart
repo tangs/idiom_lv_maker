@@ -191,6 +191,15 @@ class LocalLevelData {
     return idiom;
   }
 
+  String getIdiom(int idx, bool isHor) {
+    String idiom = '';
+    List<int> idxs = getIdiomIdx(idx, isHor);
+    for (int i = 0; i < idxs.length; ++i) {
+      idiom += words[idxs[i]];
+    }
+    return idiom;
+  }
+
   bool canPushWord(int row, int col, int withoutIdx) {
     if (row < 0 || row > 8 || col < 0 || col > 8) return false;
     int idx = row * 9 + col;
@@ -251,8 +260,7 @@ class LocalLevelData {
         types[idx] = 0;
       words[idx] = word.substring(0, 1);
     } else {
-      types[idx] = 3;
-      words[idx] = '';
+      rmWord(idx);
     }
   }
 
@@ -275,6 +283,17 @@ class LocalLevelData {
   void rmAllWord() {
     words.fillRange(0, 81, '');
     types.fillRange(0, 81, 3);
+  }
+
+  String getSelecetableInfo(int idx, bool isHor) {
+    List<int> idxs = getIdiomIdx(idx, isHor);
+    String txt = '';
+    if (idxs.length == 4) {
+      for (int idx1 in idxs) {
+        txt += hasIdiom(idx1, !isHor) ? words[idx1] : '.';
+      }
+    }
+    return txt;
   }
 
   LocalLevelData.fromLevelData(LevelData data) {

@@ -22,9 +22,16 @@ void main() {
   runApp(MyApp());
 }
 
+enum SelectableType {
+  Add,
+  Replace,
+}
+
 class SelectableInfo {
+  SelectableType type;
   String idiom;
-  int index;
+  String selectableTxt;
+  int firstWordIdx;
   bool isHor;
 }
 
@@ -141,43 +148,76 @@ class _MyHomePageState extends State<MyHomePage> {
       selectableInfos.clear();
       LocalLevelData ld = _getCurLvData();
       int idx = curSelectItemIdx;
+
       if (ld != null && idx != -1) {
         bool hasWordCurLv = ld.hasWordCurLv();
-        bool hasHorIdiom = ld.hasIdiom(idx, true);
-        bool hasVerIdiom = ld.hasIdiom(idx, false);
-        List<int> idxsHor = ld.getPushIdiomIdxs(idx, true);
-        List<int> idxsVer = ld.getPushIdiomIdxs(idx, false);
-        Function fun = (List<int> idxs, bool isHor) {
-          if (idxs != null && idxs.length > 0) {
-            String word = ld.words[idx];
-            if (!hasWordCurLv || word.length > 0) {
-              for (String idiom in idiomsSet) {
-                int start = 0;
-                do {
-                  int idx = idiom.indexOf(word, start);
-                  if (!hasWordCurLv) {
-                    idx = start;
+        String word = ld.words[idx];
+        bool canAppend = !hasWordCurLv || word.length > 0;
+
+        Function check = (String idiom, String info) {
+          if (idiom.length != 4 || info.length != 4) return false;
+          for (int i = 0; i < 4; ++i) {
+            if (info[i] != '.' && info[i] != idiom[i]) return false;
+          }
+          return true;
+        };
+
+        Function appendIdiom = (List<int> idxs, bool isHor) {
+          if (canAppend && idxs.length > 0) {
+            for (String idiom in idiomsSet) {
+              int start = 0;
+              do {
+                int idx = idiom.indexOf(word, start);
+                if (!hasWordCurLv) {
+                  idx = start;
+                }
+                if (idx != -1 && idxs.indexOf(idx) != -1) {
+                  String selectableTxt = '';
+                  for (int i = 0; i < idiom.length; ++i) {
+                    selectableTxt += i != idx ? '.' : idiom[i];
                   }
-                  if (idx != -1 && idxs.indexOf(idx) != -1) {
-                    // idioms.add(idiom);
-                    SelectableInfo si = SelectableInfo();
-                    si.idiom = idiom;
-                    si.index = idx;
-                    si.isHor = isHor;
-                    if (idiomKeyword.length == 0 || idiom.indexOf(idiomKeyword) != -1) {
-                      selectableInfos.add(si);
-                    }
-                    start = idx + 1;
-                  } else {
-                    break;
+                  SelectableInfo si = SelectableInfo();
+                  si.type = SelectableType.Add;
+                  si.idiom = idiom;
+                  si.firstWordIdx = curSelectItemIdx - idx * (isHor ? 1 : 9);
+                  si.selectableTxt = selectableTxt;
+                  si.isHor = isHor;
+                  if (idiomKeyword.length == 0 || idiom.indexOf(idiomKeyword) != -1) {
+                    selectableInfos.add(si);
                   }
-                } while (true);
+                  start = idx + 1;
+                } else {
+                  break;
+                }
+              } while (true);
+            }
+          }
+        };
+        Function fun = (int idx, bool isHor) {
+          String info = ld.getSelecetableInfo(idx, isHor);
+          List<int> idxs = ld.getPushIdiomIdxs(idx, isHor);
+          List<int> idiomIdxs = ld.getIdiomIdx(idx, isHor);
+          // bool hasIdiom = ld.hasIdiom(idx, isHor);
+          if (idiomIdxs.length != 4) {
+            appendIdiom(idxs, isHor);
+          } else if (info.length == 4) {
+            String curIdiom = ld.getIdiom(idx, isHor);
+            // contains idiom
+            for (String idiom in idiomsSet) {
+              if (check(idiom, info) && idiom != curIdiom) {
+                SelectableInfo si = SelectableInfo();
+                si.type = SelectableType.Replace;
+                si.idiom = idiom;
+                si.firstWordIdx = idiomIdxs[0];
+                si.selectableTxt = info;
+                si.isHor = isHor;
+                selectableInfos.add(si);
               }
             }
           }
         };
-        if (!hasHorIdiom) fun(idxsHor, true);
-        if (!hasVerIdiom) fun(idxsVer, false);
+        fun(idx, true);
+        fun(idx, false);
       }
     });
   }
@@ -186,12 +226,10 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       LocalLevelData ld = _getCurLvData();
       if (ld != null) {
-        bool hasWordCurLv = ld.hasWordCurLv();
-        int idx = curSelectItemIdx - info.index * (info.isHor ? 1 : 9);
+        // bool hasWordCurLv = ld.hasWordCurLv();
+        int idx = info.firstWordIdx;
         for (int i = 0; i < 4; ++i) {
-          if (!hasWordCurLv || idx != curSelectItemIdx) {
-            ld.addWord(idx, info.idiom[i]);
-          } 
+          ld.setWord(idx, info.idiom[i]);
           if (info.isHor) idx++; else idx += 9;
         }
       }
@@ -210,20 +248,28 @@ class _MyHomePageState extends State<MyHomePage> {
         return Center(
           child: RichText(
             text: TextSpan(
-              text: idiom.substring(0, info.index).toString(),
-              style: TextStyle(color: Colors.black),
+              text: idiom[0].toString(),
+              style: TextStyle(color: (info.selectableTxt[0] != '.' ? Colors.red : Colors.black)),
               children: [
                 TextSpan(
-                  text: idiom.substring(info.index, info.index + 1).toString(),
-                  style: TextStyle(color: Colors.red),
+                  text: idiom[1].toString(),
+                  style: TextStyle(color: (info.selectableTxt[1] != '.' ? Colors.red : Colors.black)),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       _addIdiom(info);
                     },
                 ),
                 TextSpan(
-                  text: idiom.substring(info.index + 1, idiom.length).toString(),
-                  style: TextStyle(color: Colors.black),
+                  text: idiom[2].toString(),
+                  style: TextStyle(color: (info.selectableTxt[2] != '.' ? Colors.red : Colors.black)),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _addIdiom(info);
+                    },
+                ),
+                TextSpan(
+                  text: idiom[3].toString(),
+                  style: TextStyle(color: (info.selectableTxt[3] != '.' ? Colors.red : Colors.black)),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       _addIdiom(info);
@@ -231,6 +277,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 TextSpan(
                   text: '[' + (info.isHor ? '水平' : '竖直') + ']',
+                  style: TextStyle(color: Colors.black),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _addIdiom(info);
+                    },
+                ),
+                TextSpan(
+                  text: '[' + (info.type == SelectableType.Add ? '新增' : '替换') + ']',
                   style: TextStyle(color: Colors.black),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
@@ -568,7 +622,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       crossAxisCount: 9,
                       crossAxisSpacing: 20.0,
                       mainAxisSpacing: 20.0,
-                      padding: EdgeInsets.all(10.0),
+                      padding: EdgeInsets.all(4.0),
                       children: _getWordsItems(),
                     ),
                   ),
