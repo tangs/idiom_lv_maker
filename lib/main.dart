@@ -237,10 +237,11 @@ class _MyHomePageState extends State<MyHomePage> {
       if (ld != null) {
         // bool hasWordCurLv = ld.hasWordCurLv();
         int idx = info.firstWordIdx;
-        for (int i = 0; i < 4; ++i) {
-          ld.setWord(idx, info.idiom[i]);
-          if (info.isHor) idx++; else idx += 9;
-        }
+        ld.addIdiom(idx, info.isHor, info.idiom);
+        // for (int i = 0; i < 4; ++i) {
+        //   ld.setWord(idx, info.idiom[i]);
+        //   if (info.isHor) idx++; else idx += 9;
+        // }
       }
       _buildSelectableInfos();
     });
@@ -380,6 +381,7 @@ class _MyHomePageState extends State<MyHomePage> {
     widgets.add(
       Padding(padding: EdgeInsets.all(8),),
     );
+    // 打开
     widgets.add(
       RaisedButton(
         child: Text('打开'),
@@ -391,6 +393,7 @@ class _MyHomePageState extends State<MyHomePage> {
     widgets.add(
       Padding(padding: EdgeInsets.all(8),),
     );
+    // 下载
     widgets.add(
       RaisedButton(
         child: Text('下载'),
@@ -410,6 +413,40 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     );
+    if (level != -1) {
+      widgets.add(
+        Padding(padding: EdgeInsets.all(8),),
+      );
+      // 删除当前关卡
+      widgets.add(
+        RaisedButton(
+          child: Text('删除关卡'),
+          onPressed: () {
+           setState(() {
+             levelsData.removeAt(level);
+             if (level >= levelsData.length) {
+               level--;
+             }
+           });
+          },
+        ),
+      );
+      widgets.add(
+        Padding(padding: EdgeInsets.all(8),),
+      );
+      // 删除当前关卡
+      widgets.add(
+        RaisedButton(
+          child: Text('新增关卡(前)'),
+          onPressed: () {
+           setState(() {
+            //  LocalLevelData ld = new LocalLevelData.fromLevelData(data)
+            //  levelsData.insert(level, element)
+           });
+          },
+        ),
+      );
+    }
     if (level != -1 && curSelectItemIdx != -1) {
       LocalLevelData lld = _getCurLvData();
       widgets.add(

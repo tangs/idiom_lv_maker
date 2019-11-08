@@ -149,6 +149,17 @@ class LocalLevelData {
   // 0.normal 1.fixed 2.mask 3.no word
   List<int> types;
 
+  LocalLevelData(int id) {
+    id = id;
+    idiom = data.idiom;
+    wifenum = data.wifenum;
+    house = data.house;
+    words = new List(81);
+    words.fillRange(0, 81, "");
+    types = new List(81);
+    types.fillRange(0, 81, 3);
+  }
+
   bool hasWordCurLv() {
     for (int type in types) {
       if (type != 3) return true;
@@ -280,6 +291,14 @@ class LocalLevelData {
     }
   }
 
+  void addIdiom(int idx, bool isHor, String idiom) {
+    for (int i = 0; i < 4; ++i) {
+      setWord(idx, idiom[i]);
+      if (isHor) idx++; else idx += 9;
+    }
+    // this.idiom.add(idiom);
+  }
+
   void rmAllWord() {
     words.fillRange(0, 81, '');
     types.fillRange(0, 81, 3);
@@ -294,6 +313,23 @@ class LocalLevelData {
       }
     }
     return txt;
+  }
+
+  void updateCurIdioms() {
+    idiom.clear();
+    Function fun = (int idx, bool isHor) {
+      bool has = hasIdiom(idx, isHor);
+      if (has) {
+        String idiom1 = getIdiom(idx, isHor);
+        if (idiom.indexOf(idiom1) == -1) {
+          idiom.add(idiom1);
+        }
+      }
+    };
+    for (int i = 0; i < 81; ++i) {
+      fun(i, true);
+      fun(i, false);
+    }
   }
 
   LocalLevelData.fromLevelData(LevelData data) {
@@ -318,6 +354,7 @@ class LocalLevelData {
   }
 
   LevelData toLevelData() {
+    updateCurIdioms();
     LevelData ld = new LevelData(
       id: id,
       levelup: levelup,
