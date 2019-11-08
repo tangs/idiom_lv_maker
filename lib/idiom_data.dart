@@ -147,6 +147,7 @@ class LocalLevelData {
   int house;
   List<String> idiom;
   List<String> words;
+  // 0.normal 1.fixed 2.mask 3.no word
   List<int> types;
 
   LocalLevelData(int id, int levelup, int hero, int wifenum, int house) {
@@ -296,6 +297,7 @@ class LocalLevelData {
   void addIdiom(int idx, bool isHor, String idiom) {
     for (int i = 0; i < 4; ++i) {
       setWord(idx, idiom[i]);
+      types[idx] = 1;
       if (isHor) idx++; else idx += 9;
     }
     // this.idiom.add(idiom);
