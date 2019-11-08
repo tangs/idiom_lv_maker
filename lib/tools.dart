@@ -2,11 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'dart:io';
+
 import './web_tools.dart';
 
 class Tools {
   static void getFileText(Function callback) async {
-    if (Platform == null || Platform.operatingSystem == null) {
+    if (kIsWeb) {
       WebTools.getFileText(callback);
     } else if (Platform.isMacOS) {
       // mac platform
@@ -25,7 +26,7 @@ class Tools {
 
   static void saveFile(String txt) async {
     // mac platform
-    if (Platform == null || Platform.operatingSystem == null) {
+    if (kIsWeb) {
       WebTools.saveFile(txt);
     } else if (Platform.isMacOS) {
       const platform = const MethodChannel('tangs.com/lv_maker');
