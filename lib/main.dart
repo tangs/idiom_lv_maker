@@ -160,6 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
         bool canAppend = !hasWordCurLv || word.length > 0;
 
         Function check = (String idiom, String info) {
+          if (info == '....') return false;
           if (idiom.length != 4 || info.length != 4) return false;
           for (int i = 0; i < 4; ++i) {
             if (info[i] != '.' && info[i] != idiom[i]) return false;
@@ -244,6 +245,16 @@ class _MyHomePageState extends State<MyHomePage> {
         // }
       }
       _buildSelectableInfos();
+    });
+  }
+
+  void _insertLv(bool isPrev) {
+    setState(() {
+      int nextLv = isPrev ? level : level + 1;
+      LocalLevelData curData = _getCurLvData();
+      LocalLevelData newData = LocalLevelData.fromData(curData);
+      levelsData.insert(nextLv, newData);
+      level = nextLv;
     });
   }
 
@@ -439,10 +450,19 @@ class _MyHomePageState extends State<MyHomePage> {
         RaisedButton(
           child: Text('新增关卡(前)'),
           onPressed: () {
-           setState(() {
-            //  LocalLevelData ld = new LocalLevelData.fromLevelData(data)
-            //  levelsData.insert(level, element)
-           });
+            _insertLv(true);
+          },
+        ),
+      );
+      widgets.add(
+        Padding(padding: EdgeInsets.all(8),),
+      );
+      // 删除当前关卡
+      widgets.add(
+        RaisedButton(
+          child: Text('新增关卡(后)'),
+          onPressed: () {
+            _insertLv(false);
           },
         ),
       );

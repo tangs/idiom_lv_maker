@@ -24,6 +24,7 @@ class LevelData {
     this.word,
     this.mask,
   });
+
   LevelData.fromJson(Map<String, dynamic> json) {
     id = json["id"]?.toInt();
     if (json["posx"] != null) {
@@ -142,18 +143,19 @@ class LocalLevelData {
   int id;
   int levelup;
   int hero;
-  List<String> idiom;
   int wifenum;
   int house;
+  List<String> idiom;
   List<String> words;
-  // 0.normal 1.fixed 2.mask 3.no word
   List<int> types;
 
-  LocalLevelData(int id) {
+  LocalLevelData(int id, int levelup, int hero, int wifenum, int house) {
     id = id;
-    idiom = data.idiom;
-    wifenum = data.wifenum;
-    house = data.house;
+    levelup = levelup;
+    hero = hero;
+    wifenum = wifenum;
+    house = house;
+    idiom = [];
     words = new List(81);
     words.fillRange(0, 81, "");
     types = new List(81);
@@ -330,6 +332,19 @@ class LocalLevelData {
       fun(i, true);
       fun(i, false);
     }
+  }
+
+  LocalLevelData.fromData(LocalLevelData data) {
+    id = data.id;
+    levelup = data.levelup;
+    hero = data.hero;
+    wifenum = data.wifenum;
+    house = data.house;
+    idiom = [];
+    words = new List(81);
+    words.fillRange(0, 81, "");
+    types = new List(81);
+    types.fillRange(0, 81, 3);
   }
 
   LocalLevelData.fromLevelData(LevelData data) {

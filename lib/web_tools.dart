@@ -26,7 +26,7 @@ class WebTools {
     var link = querySelector('#downloader') as AnchorElement;
     var myData = [txt];
     // Plain text type, 'native' line endings
-    var blob = new Blob(myData, 'text/plain', 'native');
+    var blob = new Blob(myData, 'application/json', 'native');
     link.download = "IdiomConfig.json";
     link.href = Url.createObjectUrlFromBlob(blob).toString();
     link.text = "Download Now!";
