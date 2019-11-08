@@ -414,6 +414,7 @@ class _MyHomePageState extends State<MyHomePage> {
           for (int i = 0; i < len; ++i) {
             LocalLevelData data = levelsData[i];
             LevelData ld = data.toLevelData();
+            ld.id = i;
             final string = jsonEncode(ld.toJson());
             buffer.write(string);
             if (i < len - 1) buffer.write(',');
