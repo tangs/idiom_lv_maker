@@ -7,18 +7,20 @@ class AppDelegate: FlutterAppDelegate {
     let controller : FlutterViewController = mainFlutterWindow?.contentViewController as! FlutterViewController
     let channel = FlutterMethodChannel.init(name: "tangs.com/lv_maker", binaryMessenger: controller.engine.binaryMessenger)
     channel.setMethodCallHandler({
-      (call: FlutterMethodCall, result: FlutterResult) -> Void in
+      (_ call: FlutterMethodCall, _ result: FlutterResult) -> Void in
       if ("openFile" == call.method) {
         self.openFile(result: result);
       } else if ("saveFile" == call.method) {
-        let txt = call.arguments as! String
-        self.saveFile(result: result, txt: txt)
+        let arguments = call.arguments
+        if arguments is String {
+          let txt = arguments as! String
+          self.saveFile(result: result, txt: txt)
+        }
       }
     });
-    return super.applicationDidFinishLaunching(notification);
   }
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-    
+
     return true
   }
   
