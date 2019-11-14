@@ -93,8 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _loadLevelData(int error, String txt) {
-    if (error != 0) return;
+  void _loadLevelData(String txt) {
+    // if (error != 0) return;
     setState(() {
       levelsData.clear();
       // idiomsSet.clear();
@@ -396,8 +396,14 @@ class _MyHomePageState extends State<MyHomePage> {
     widgets.add(
       RaisedButton(
         child: Text('打开'),
-        onPressed: () {
-          Tools.getFileText(_loadLevelData);
+        onPressed: () async {
+          // Tools.getFileText(_loadLevelData);
+          try {
+            String txt = await Tools.getFileText();
+            _loadLevelData(txt);
+          } catch (e) {
+            print(e);
+          }
         },
       ),
     );

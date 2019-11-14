@@ -1,23 +1,40 @@
 import 'dart:html';
 
 class WebTools {
-  static void getFileText(Function callback) async {
+  static Future<String> getFileText() async {
     InputElement uploadInput = FileUploadInputElement();
     uploadInput.click();
-
-    uploadInput.onChange.listen((e) {
+    await for (final _ in uploadInput.onChange) {
       final files = uploadInput.files;
       if (files.length == 1) {
         final file = files[0];
         final reader = new FileReader();
-
-        reader.onLoadEnd.listen((e) {
-          final result = reader.result;
-          callback(0, result);
-        });
         reader.readAsText(file);
+        await for (final _ in reader.onLoadEnd) {
+          return Future.value(reader.result);
+        }
+        return Future.error('read fail1.');
+        // reader.onLoadEnd.listen((e) {
+        //   final result = reader.result;
+        //   // callback(0, result);
+        // });
       }
-    });
+      return Future.error('read fail2.');
+    }
+    return Future.error('read fail3.');
+    // uploadInput.onChange.listen((e) {
+    //   final files = uploadInput.files;
+    //   if (files.length == 1) {
+    //     final file = files[0];
+    //     final reader = new FileReader();
+
+    //     reader.onLoadEnd.listen((e) {
+    //       final result = reader.result;
+    //       callback(0, result);
+    //     });
+    //     reader.readAsText(file);
+    //   }
+    // });
   }
 
   static void saveFile(String txt) async {

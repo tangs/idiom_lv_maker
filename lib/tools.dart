@@ -6,22 +6,22 @@ import 'dart:io';
 import './web_tools.dart';
 
 class Tools {
-  static void getFileText(Function callback) async {
+  static Future<String> getFileText() async {
     if (kIsWeb) {
-      WebTools.getFileText(callback);
+      // WebTools.getFileText(callback);
+      return WebTools.getFileText();
     } else if (Platform.isMacOS) {
       // mac platform
       const platform = const MethodChannel('tangs.com/lv_maker');
       try {
         final String str = await platform.invokeMethod('openFile');
-        // str = '$result';
-        int error = str.length == 0 ? 1 : 0;
-        callback(error, str);
-      } on PlatformException catch (e) {
-        debugPrint("Failed: '${e.message}'.");
-        callback(2, e.message);
+        return Future.value(str);
+      } catch (e) {
+        return Future.error(e);
       }
     }
+    // TODO other platform.
+    return Future.error('can not support current platform.');
   }
 
   static void saveFile(String txt) async {
