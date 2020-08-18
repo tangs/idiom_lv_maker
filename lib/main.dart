@@ -39,7 +39,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: 'Idiom Level Maker',
       theme: ThemeData(
@@ -80,8 +79,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _loadIdioms(BuildContext context) {
     if (idiomsSet.length > 0) return;
-      // AssetBundle.loadString('assets/idioms.json');
-    DefaultAssetBundle.of(context).loadString('assets/config/idioms.json').then((onValue) {
+    // AssetBundle.loadString('assets/idioms.json');
+    DefaultAssetBundle.of(context)
+        .loadString('assets/config/idioms.json')
+        .then((onValue) {
       // debugPrint(onValue);
       setState(() {
         // idiomsSet.clear();
@@ -98,7 +99,8 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       levelsData.clear();
       // idiomsSet.clear();
-      dynamic json = new JsonDecoder().convert(txt);
+      // dynamic json = new JsonDecoder().convert(txt);
+      List<dynamic> json = jsonDecode(txt);
       for (dynamic data in json) {
         LevelData ld = new LevelData.fromJson(data);
         LocalLevelData lld = LocalLevelData.fromLevelData(ld);
@@ -188,7 +190,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   si.firstWordIdx = curSelectItemIdx - idx * (isHor ? 1 : 9);
                   si.selectableTxt = selectableTxt;
                   si.isHor = isHor;
-                  if (idiomKeyword.length == 0 || idiom.indexOf(idiomKeyword) != -1) {
+                  if (idiomKeyword.length == 0 ||
+                      idiom.indexOf(idiomKeyword) != -1) {
                     selectableInfos.add(si);
                   }
                   start = idx + 1;
@@ -270,11 +273,17 @@ class _MyHomePageState extends State<MyHomePage> {
           child: RichText(
             text: TextSpan(
               text: idiom[0].toString(),
-              style: TextStyle(color: (info.selectableTxt[0] != '.' ? Colors.red : Colors.black)),
+              style: TextStyle(
+                  color: (info.selectableTxt[0] != '.'
+                      ? Colors.red
+                      : Colors.black)),
               children: [
                 TextSpan(
                   text: idiom[1].toString(),
-                  style: TextStyle(color: (info.selectableTxt[1] != '.' ? Colors.red : Colors.black)),
+                  style: TextStyle(
+                      color: (info.selectableTxt[1] != '.'
+                          ? Colors.red
+                          : Colors.black)),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       _addIdiom(info);
@@ -282,7 +291,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 TextSpan(
                   text: idiom[2].toString(),
-                  style: TextStyle(color: (info.selectableTxt[2] != '.' ? Colors.red : Colors.black)),
+                  style: TextStyle(
+                      color: (info.selectableTxt[2] != '.'
+                          ? Colors.red
+                          : Colors.black)),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       _addIdiom(info);
@@ -290,7 +302,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 TextSpan(
                   text: idiom[3].toString(),
-                  style: TextStyle(color: (info.selectableTxt[3] != '.' ? Colors.red : Colors.black)),
+                  style: TextStyle(
+                      color: (info.selectableTxt[3] != '.'
+                          ? Colors.red
+                          : Colors.black)),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       _addIdiom(info);
@@ -305,7 +320,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                 ),
                 TextSpan(
-                  text: '[' + (info.type == SelectableType.Add ? '新增' : '替换') + ']',
+                  text: '[' +
+                      (info.type == SelectableType.Add ? '新增' : '替换') +
+                      ']',
                   style: TextStyle(color: Colors.black),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
@@ -348,8 +365,11 @@ class _MyHomePageState extends State<MyHomePage> {
           int type = lld.types[i];
           bool isMask = type == 2;
           bool isFixed = type == 1;
-          imgPath = isMask ? "assets/image/game_tt_bg4.png" :
-            isFixed ? "assets/image/game_tt_bg3.png" : "assets/image/game_tt_bg2.png";
+          imgPath = isMask
+              ? "assets/image/game_tt_bg4.png"
+              : isFixed
+                  ? "assets/image/game_tt_bg3.png"
+                  : "assets/image/game_tt_bg2.png";
           // word = ld.word[idx];
         }
       }
@@ -390,7 +410,9 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _getFuncsItems() {
     List<Widget> widgets = List();
     widgets.add(
-      Padding(padding: EdgeInsets.all(8),),
+      Padding(
+        padding: EdgeInsets.all(8),
+      ),
     );
     // 打开
     widgets.add(
@@ -408,7 +430,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
     widgets.add(
-      Padding(padding: EdgeInsets.all(8),),
+      Padding(
+        padding: EdgeInsets.all(8),
+      ),
     );
     // 下载
     widgets.add(
@@ -433,24 +457,28 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     if (level != -1) {
       widgets.add(
-        Padding(padding: EdgeInsets.all(8),),
+        Padding(
+          padding: EdgeInsets.all(8),
+        ),
       );
       // 删除当前关卡
       widgets.add(
         RaisedButton(
           child: Text('删除关卡'),
           onPressed: () {
-           setState(() {
-             levelsData.removeAt(level);
-             if (level >= levelsData.length) {
-               level--;
-             }
-           });
+            setState(() {
+              levelsData.removeAt(level);
+              if (level >= levelsData.length) {
+                level--;
+              }
+            });
           },
         ),
       );
       widgets.add(
-        Padding(padding: EdgeInsets.all(8),),
+        Padding(
+          padding: EdgeInsets.all(8),
+        ),
       );
       // 删除当前关卡
       widgets.add(
@@ -462,7 +490,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
       widgets.add(
-        Padding(padding: EdgeInsets.all(8),),
+        Padding(
+          padding: EdgeInsets.all(8),
+        ),
       );
       // 删除当前关卡
       widgets.add(
@@ -477,43 +507,47 @@ class _MyHomePageState extends State<MyHomePage> {
     if (level != -1 && curSelectItemIdx != -1) {
       LocalLevelData lld = _getCurLvData();
       widgets.add(
-        Padding(padding: EdgeInsets.all(8),),
+        Padding(
+          padding: EdgeInsets.all(8),
+        ),
       );
       int type = _getCurItemType();
       if (lld.hasWord(curSelectItemIdx)) {
-      // 选择当前文字状态
+        // 选择当前文字状态
         widgets.add(
           Flexible(
             child: RadioListTile(
-              value:2,
+              value: 2,
               groupValue: type,
               title: Text('隐藏'),
-              onChanged:(v) => _switchCurItemType(2),
+              onChanged: (v) => _switchCurItemType(2),
             ),
           ),
         );
         widgets.add(
           Flexible(
             child: RadioListTile(
-              value:1,
+              value: 1,
               groupValue: type,
               title: Text('固定'),
-              onChanged:(v) => _switchCurItemType(1),
+              onChanged: (v) => _switchCurItemType(1),
             ),
           ),
         );
         widgets.add(
           Flexible(
             child: RadioListTile(
-              value:0,
+              value: 0,
               groupValue: type,
               title: Text('普通'),
-              onChanged:(v) => _switchCurItemType(0),
+              onChanged: (v) => _switchCurItemType(0),
             ),
           ),
         );
         widgets.add(
-          Padding(padding: EdgeInsets.all(8),),
+          Padding(
+            padding: EdgeInsets.all(8),
+          ),
         );
       }
     }
@@ -523,12 +557,14 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _getFuncsItems1() {
     List<Widget> widgets = List();
     widgets.add(
-      Padding(padding: EdgeInsets.all(8),),
+      Padding(
+        padding: EdgeInsets.all(8),
+      ),
     );
     if (level != -1 && curSelectItemIdx != -1) {
       LocalLevelData lld = _getCurLvData();
       if (lld.hasWord(curSelectItemIdx)) {
-      // 选择当前文字状态
+        // 选择当前文字状态
         // 删除文字
         widgets.add(
           RaisedButton(
@@ -547,29 +583,32 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
         widgets.add(
-          Padding(padding: EdgeInsets.all(8),),
+          Padding(
+            padding: EdgeInsets.all(8),
+          ),
         );
       }
       // 修改文字
       String word = lld.words[curSelectItemIdx];
       widgets.add(
         Flexible(
-          child: TextField(
-            controller: new TextEditingController(text: word),
-            onSubmitted: (String txt) {
-              lld.setWord(curSelectItemIdx, txt);
-              _buildSelectableInfos();
-            },
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '修改文字',
-            ),
-            // maxLength: 1,
-          )
-        ),
+            child: TextField(
+          controller: new TextEditingController(text: word),
+          onSubmitted: (String txt) {
+            lld.setWord(curSelectItemIdx, txt);
+            _buildSelectableInfos();
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: '修改文字',
+          ),
+          // maxLength: 1,
+        )),
       );
       widgets.add(
-        Padding(padding: EdgeInsets.all(8),),
+        Padding(
+          padding: EdgeInsets.all(8),
+        ),
       );
 
       // 删除水平方向成语
@@ -591,9 +630,11 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           ),
         );
-        
+
         widgets.add(
-          Padding(padding: EdgeInsets.all(8),),
+          Padding(
+            padding: EdgeInsets.all(8),
+          ),
         );
       }
 
@@ -617,32 +658,36 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
         widgets.add(
-          Padding(padding: EdgeInsets.all(8),),
+          Padding(
+            padding: EdgeInsets.all(8),
+          ),
         );
       }
-      
+
       // 删除所有文字
       widgets.add(
         RaisedButton(
           child: Text('清空'),
           onPressed: () {
             setState(() {
-                LocalLevelData lld = _getCurLvData();
-                if (lld != null) {
-                  lld.rmAllWord();
-                  _buildSelectableInfos();
-                }
-              });
+              LocalLevelData lld = _getCurLvData();
+              if (lld != null) {
+                lld.rmAllWord();
+                _buildSelectableInfos();
+              }
+            });
           },
         ),
       );
       widgets.add(
-        Padding(padding: EdgeInsets.all(8),),
+        Padding(
+          padding: EdgeInsets.all(8),
+        ),
       );
     }
     return widgets;
   }
-  
+
   Widget _getLvCell(int idx) {
     return RadioListTile(
       // isThreeLine: true,
@@ -706,18 +751,24 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Padding(padding: EdgeInsets.all(4),),
+            Padding(
+              padding: EdgeInsets.all(4),
+            ),
             Row(
               children: _getFuncsItems(),
             ),
             Row(
               children: _getFuncsItems1(),
             ),
-            Padding(padding: EdgeInsets.all(4),),
+            Padding(
+              padding: EdgeInsets.all(4),
+            ),
             Expanded(
               child: Row(
                 children: <Widget>[
-                  Padding(padding: EdgeInsets.all(8),),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
                   Container(
                     width: 160,
                     child: Column(
@@ -742,7 +793,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       ],
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(8),),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
                   Expanded(
                     child: GridView.count(
                       crossAxisCount: 9,
@@ -752,13 +805,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: _getWordsItems(),
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(8),),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
                   Container(
                     width: 200,
                     child: Column(
                       children: <Widget>[
                         TextField(
-                          controller: new TextEditingController(text: idiomKeyword),
+                          controller:
+                              new TextEditingController(text: idiomKeyword),
                           onSubmitted: (String txt) {
                             _setIdiomKeyword(txt);
                           },
@@ -780,7 +836,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               },
                             ),
                             Text('水平'),
-                            Padding(padding: EdgeInsets.all(8),),
+                            Padding(
+                              padding: EdgeInsets.all(8),
+                            ),
                             Checkbox(
                               value: showVerIdiom,
                               onChanged: (bool val) {
@@ -806,7 +864,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               },
                             ),
                             Text('新增'),
-                            Padding(padding: EdgeInsets.all(8),),
+                            Padding(
+                              padding: EdgeInsets.all(8),
+                            ),
                             Checkbox(
                               value: showReplaceIdiom,
                               onChanged: (bool val) {
@@ -825,7 +885,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       ],
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(8),),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
                 ],
               ),
             ),

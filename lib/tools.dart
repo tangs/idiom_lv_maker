@@ -33,7 +33,7 @@ class Tools {
       try {
         int ret = await platform.invokeMethod('saveFile', txt);
         if (ret != 0) {
-          debugPrint("Save Failed.");  
+          debugPrint("Save Failed.");
         }
       } on PlatformException catch (e) {
         debugPrint("Failed: '${e.message}'.");

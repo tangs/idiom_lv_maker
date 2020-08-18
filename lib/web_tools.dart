@@ -1,4 +1,5 @@
-import 'dart:html';
+// import 'dart:html';
+import 'package:universal_html/html.dart';
 
 class WebTools {
   static Future<String> getFileText() async {
