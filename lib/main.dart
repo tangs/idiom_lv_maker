@@ -120,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       curSelectItemIdx = idx;
       _setIdiomKeyword('');
-      _buildSelectableInfos();
+      // _buildSelectableInfos();
     });
   }
 

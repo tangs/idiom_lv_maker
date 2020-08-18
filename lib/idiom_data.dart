@@ -22,55 +22,55 @@ class LevelDataData {
     this.mask,
   });
   LevelDataData.fromJson(Map<String, dynamic> json) {
-  if (json["posx"] != null) {
-  var v = json["posx"];
-  var arr0 = List<int>();
-  v.forEach((v) {
-  arr0.add(v.toInt());
-  });
-    posx = arr0;
+    if (json["posx"] != null) {
+      var v = json["posx"];
+      var arr0 = List<int>();
+      v.forEach((v) {
+        arr0.add(v.toInt());
+      });
+      posx = arr0;
     }
-  if (json["posy"] != null) {
-  var v = json["posy"];
-  var arr0 = List<int>();
-  v.forEach((v) {
-  arr0.add(v.toInt());
-  });
-    posy = arr0;
+    if (json["posy"] != null) {
+      var v = json["posy"];
+      var arr0 = List<int>();
+      v.forEach((v) {
+        arr0.add(v.toInt());
+      });
+      posy = arr0;
     }
-  if (json["answer"] != null) {
-  var v = json["answer"];
-  var arr0 = List<int>();
-  v.forEach((v) {
-  arr0.add(v.toInt());
-  });
-    answer = arr0;
+    if (json["answer"] != null) {
+      var v = json["answer"];
+      var arr0 = List<int>();
+      v.forEach((v) {
+        arr0.add(v.toInt());
+      });
+      answer = arr0;
     }
     hero = json["hero"]?.toInt();
-  if (json["idiom"] != null) {
-  var v = json["idiom"];
-  var arr0 = List<String>();
-  v.forEach((v) {
-  arr0.add(v.toString());
-  });
-    idiom = arr0;
+    if (json["idiom"] != null) {
+      var v = json["idiom"];
+      var arr0 = List<String>();
+      v.forEach((v) {
+        arr0.add(v.toString());
+      });
+      idiom = arr0;
     }
     house = json["house"]?.toInt();
-  if (json["word"] != null) {
-  var v = json["word"];
-  var arr0 = List<String>();
-  v.forEach((v) {
-  arr0.add(v.toString());
-  });
-    word = arr0;
+    if (json["word"] != null) {
+      var v = json["word"];
+      var arr0 = List<String>();
+      v.forEach((v) {
+        arr0.add(v.toString());
+      });
+      word = arr0;
     }
-  if (json["mask"] != null) {
-  var v = json["mask"];
-  var arr0 = List<int>();
-  v.forEach((v) {
-  arr0.add(v.toInt());
-  });
-    mask = arr0;
+    if (json["mask"] != null) {
+      var v = json["mask"];
+      var arr0 = List<int>();
+      v.forEach((v) {
+        arr0.add(v.toInt());
+      });
+      mask = arr0;
     }
   }
   Map<String, dynamic> toJson() {
@@ -78,51 +78,51 @@ class LevelDataData {
     if (posx != null) {
       var v = posx;
       var arr0 = List();
-  v.forEach((v) {
-  arr0.add(v);
-  });
+      v.forEach((v) {
+        arr0.add(v);
+      });
       data["posx"] = arr0;
     }
     if (posy != null) {
       var v = posy;
       var arr0 = List();
-  v.forEach((v) {
-  arr0.add(v);
-  });
+      v.forEach((v) {
+        arr0.add(v);
+      });
       data["posy"] = arr0;
     }
     if (answer != null) {
       var v = answer;
       var arr0 = List();
-  v.forEach((v) {
-  arr0.add(v);
-  });
+      v.forEach((v) {
+        arr0.add(v);
+      });
       data["answer"] = arr0;
     }
     data["hero"] = hero;
     if (idiom != null) {
       var v = idiom;
       var arr0 = List();
-  v.forEach((v) {
-  arr0.add(v);
-  });
+      v.forEach((v) {
+        arr0.add(v);
+      });
       data["idiom"] = arr0;
     }
     data["house"] = house;
     if (word != null) {
       var v = word;
       var arr0 = List();
-  v.forEach((v) {
-  arr0.add(v);
-  });
+      v.forEach((v) {
+        arr0.add(v);
+      });
       data["word"] = arr0;
     }
     if (mask != null) {
       var v = mask;
       var arr0 = List();
-  v.forEach((v) {
-  arr0.add(v);
-  });
+      v.forEach((v) {
+        arr0.add(v);
+      });
       data["mask"] = arr0;
     }
     return data;
@@ -248,10 +248,16 @@ class LocalLevelData {
       int col = sCol;
       for (int j = 0; j < 4; ++j) {
         if (!canPushWord(row, col, withoutIdx)) isSucc = false;
-        if (isHor) col++; else row++;
+        if (isHor)
+          col++;
+        else
+          row++;
       }
       if (isSucc) idxs.add(i);
-      if (isHor) sCol--; else sRow--;
+      if (isHor)
+        sCol--;
+      else
+        sRow--;
       if (sCol < 0 || sRow < 0) break;
     }
     return idxs;
@@ -282,8 +288,7 @@ class LocalLevelData {
 
   void setWord(int idx, String word) {
     if (word.length > 0) {
-      if (types[idx] == 3)
-        types[idx] = 0;
+      if (types[idx] == 3) types[idx] = 1;
       words[idx] = word.substring(0, 1);
     } else {
       rmWord(idx);
@@ -309,8 +314,11 @@ class LocalLevelData {
   void addIdiom(int idx, bool isHor, String idiom) {
     for (int i = 0; i < 4; ++i) {
       setWord(idx, idiom[i]);
-      types[idx] = 1;
-      if (isHor) idx++; else idx += 9;
+      // types[idx] = 1;
+      if (isHor)
+        idx++;
+      else
+        idx += 9;
     }
     // this.idiom.add(idiom);
   }
@@ -377,7 +385,7 @@ class LocalLevelData {
       bool isMask = data.mask.indexOf(i) != -1;
       bool isFixed = data.answer.indexOf(i) == -1;
       words[pos] = data.word[i];
-      types[pos] = isMask ? 2: isFixed ? 1 : 0;
+      types[pos] = isMask ? 2 : isFixed ? 1 : 0;
     }
   }
 
@@ -386,9 +394,9 @@ class LocalLevelData {
     LevelData ld = new LevelData(
       id: id,
       data: new LevelDataData(
-          hero: hero,
-          idiom: idiom,
-          house: house,
+        hero: hero,
+        idiom: idiom,
+        house: house,
       ),
     );
     List<int> posx = new List();
@@ -404,18 +412,19 @@ class LocalLevelData {
         posx.add(i % 9);
         posy.add(8 - (i / 9).floor());
         switch (type) {
-          case 0: {
-            answer.add(idx);
-          }
-          break;
-          case 1: {
-
-          }
-          break;
-          case 2: {
-            mask.add(idx);
-          }
-          break;
+          case 0:
+            {
+              answer.add(idx);
+            }
+            break;
+          case 1:
+            {}
+            break;
+          case 2:
+            {
+              mask.add(idx);
+            }
+            break;
         }
         ++idx;
       }
