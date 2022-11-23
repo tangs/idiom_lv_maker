@@ -111,7 +111,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _setIdiomKeyword(String keyword) {
     setState(() {
-      idiomKeyword = keyword == null ? '' : keyword;
+      // idiomKeyword = keyword == null ? '' : keyword;
+      idiomKeyword = '';
+      if (keyword != null) {
+        idiomKeyword = keyword;
+      }
       _buildSelectableInfos();
     });
   }
